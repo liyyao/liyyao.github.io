@@ -2,7 +2,7 @@
 <search>
   <entry>
     <title>阿里云nacos集群部署</title>
-    <url>/2020/08/29/%E9%98%BF%E9%87%8C%E4%BA%91%E9%83%A8%E7%BD%B2nacos%E9%9B%86%E7%BE%A4/</url>
+    <url>/2020/08/29/aliyun-nacos/</url>
     <content><![CDATA[<h2 id="1-准备4台linux服务器"><a href="#1-准备4台linux服务器" class="headerlink" title="1. 准备4台linux服务器"></a>1. 准备4台linux服务器</h2><ul>
 <li>准备阿里云服务器4台，3台用做nacos集群，1台用做mysql数据库</li>
 <li>配置阿里云服务器网络安全组，打开入网端口</li>

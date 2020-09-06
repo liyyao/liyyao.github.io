@@ -5,7 +5,7 @@
     <url>/2020/08/29/aliyun-nacos/</url>
     <content><![CDATA[<h2 id="1-准备4台linux服务器"><a href="#1-准备4台linux服务器" class="headerlink" title="1. 准备4台linux服务器"></a>1. 准备4台linux服务器</h2><ul>
 <li>准备阿里云服务器4台，3台用做nacos集群，1台用做mysql数据库</li>
-<li>配置阿里云服务器网络安全组，打开入网端口</li>
+<li>配置阿里云服务器网络安全组，打开入网端口（8848）</li>
 </ul>
 <h2 id="2-安装mysql"><a href="#2-安装mysql" class="headerlink" title="2. 安装mysql"></a>2. 安装mysql</h2><h3 id="（1）下载并安装MySQL官方的Yum-Repository-Mysql版本-5-7-14"><a href="#（1）下载并安装MySQL官方的Yum-Repository-Mysql版本-5-7-14" class="headerlink" title="（1）下载并安装MySQL官方的Yum Repository, Mysql版本 5.7.14"></a>（1）下载并安装MySQL官方的Yum Repository, Mysql版本 5.7.14</h3><pre><code># wget -i -c https://dev.mysql.com/get/mysql57-community-release-el7-10.noarch.rpm
 # yum -y install mysql57-community-release-el7-10.noarch.rpm</code></pre>
@@ -42,6 +42,9 @@
 </blockquote>
 </li>
 <li><p>进行远程连接测试</p>
+<blockquote>
+<p>本地进行连接测试</p>
+</blockquote>
 </li>
 <li><p>为firewalld添加开放端口</p>
 <blockquote>
@@ -54,20 +57,20 @@
 </blockquote>
 </li>
 </ul>
-<h2 id="3-安装Nacos"><a href="#3-安装Nacos" class="headerlink" title="3. 安装Nacos"></a>3. 安装Nacos</h2><h3 id="（1）准备3台服务器作naco集群"><a href="#（1）准备3台服务器作naco集群" class="headerlink" title="（1）准备3台服务器作naco集群"></a>（1）准备3台服务器作naco集群</h3><blockquote>
+<h2 id="3-安装Nacos"><a href="#3-安装Nacos" class="headerlink" title="3. 安装Nacos"></a>3. 安装Nacos</h2><h3 id="（1）准备3台服务器作nacos集群"><a href="#（1）准备3台服务器作nacos集群" class="headerlink" title="（1）准备3台服务器作nacos集群"></a>（1）准备3台服务器作nacos集群</h3><blockquote>
 <p>配置hosts<br># vi /etc/hosts<br>配置本机的hostname到ip地址的映射</p>
 </blockquote>
 <h3 id="（2）安装JDK"><a href="#（2）安装JDK" class="headerlink" title="（2）安装JDK"></a>（2）安装JDK</h3><blockquote>
-<p>上传jdk，然后安装  # rpm -ivh jdk-xxx.rpm<br>配置jdk相关环境变量 # vi /etc/bashrc<br>export JAVA_HOME=/usr/java/xxx<br>export PATH=$PATH:$JAVA_HOME/bin<br>source /etc/bashrc<br>测试jdc安装是否成功：java -version</p>
+<p>到ORACLE官网下载linux版本的jdk:<a href="https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html">https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html</a><br>上传jdk到三台服务器上，然后安装  # rpm -ivh jdk-8u131-linux-x64.rpm<br>配置jdk相关环境变量 # vi /etc/bashrc<br>export JAVA_HOME=/usr/java/xxx<br>export PATH=$PATH:$JAVA_HOME/bin<br>source /etc/bashrc<br>测试jdc安装是否成功：java -version</p>
 </blockquote>
 <h3 id="（3）下载nacos-server-1-4版本的源码"><a href="#（3）下载nacos-server-1-4版本的源码" class="headerlink" title="（3）下载nacos-server-1.4版本的源码"></a>（3）下载nacos-server-1.4版本的源码</h3><pre><code># git clone https://github.com/alibaba/nacos.git
 # cd nacos
 # mvn -Prelease-nacos -Dmaven.test.skip=true clean install -U
-# ls -al distribution/target/</code></pre>
-<h3 id="（4）-nacos上传到服务器上"><a href="#（4）-nacos上传到服务器上" class="headerlink" title="（4） nacos上传到服务器上"></a>（4） nacos上传到服务器上</h3><pre><code>win命令可以用 scp xxx root@192.168.xxx.xxx:/usr/local/xxx 进行上传</code></pre>
+# ls -al distribution/target/ 可以看到nacos-server-1.4.0-SNAPSHOT.tar.gz压缩包  </code></pre>
+<h3 id="（4）-nacos上传到服务器上"><a href="#（4）-nacos上传到服务器上" class="headerlink" title="（4） nacos上传到服务器上"></a>（4） nacos上传到服务器上</h3><pre><code>win命令可以用 scp nacos-server-1.4.0-SNAPSHOT.tar.gz root@192.168.xxx.xxx:/usr/local/xxx 上传到三台服务器上</code></pre>
 <h3 id="（5）配置nacos"><a href="#（5）配置nacos" class="headerlink" title="（5）配置nacos"></a>（5）配置nacos</h3><ul>
 <li>解压nacos  <ul>
-<li>重命名 cluster.conf.example, 去掉 example: mv cluster.conf.example cluster.conf, 配置三台机器的地址和端口号，默认端口号是8848  </li>
+<li>进入到nacos/conf目录下，重命名 cluster.conf.example, 去掉 example: mv cluster.conf.example cluster.conf, 然后编辑cluster.conf文件，配置三台机器的地址和端口号，默认端口号是8848  </li>
 <li>配置数据库    <blockquote>
 <p>修改application.properties文件里面数据库配置<br>spring.datasource.platform=mysql<br>db.num=1<br>db.url.0=xx, 替换成mysql数据库端口号及数据库<br>db.user=xx<br>db.password=xx</p>
 </blockquote>
@@ -99,6 +102,80 @@
       <categories>
         <category>SpringCloud</category>
         <category>nacos</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Ubuntu/优麒麟安装deepin-wine微信的方法</title>
+    <url>/2020/08/30/linux-wechat/</url>
+    <content><![CDATA[<h2 id="ubuntu-16-04及以上可用。"><a href="#ubuntu-16-04及以上可用。" class="headerlink" title="ubuntu 16.04及以上可用。"></a>ubuntu 16.04及以上可用。</h2><ul>
+<li><p>32位支持</p>
+<blockquote>
+<p># sudo dpkg –add-architecture i386</p>
+</blockquote>
+</li>
+<li><p>添加源</p>
+<blockquote>
+<p># sudo vim /etc/apt/sources.list<br># deb <a href="https://mirrors.aliyun.com/deepin/">https://mirrors.aliyun.com/deepin/</a> panda main contrib non-free<br># deb-src <a href="https://mirrors.aliyun.com/deepin/">https://mirrors.aliyun.com/deepin/</a> panda main contrib non-free<br># deb <a href="https://mirrors.aliyun.com/deepin/">https://mirrors.aliyun.com/deepin/</a> panda main contrib non-free  </p>
+</blockquote>
+</li>
+<li><p>保存后为上面的源加入许可证</p>
+<blockquote>
+<p># wget <a href="https://mirrors.aliyun.com/deepin/project/deepin-keyring.gpg">https://mirrors.aliyun.com/deepin/project/deepin-keyring.gpg</a><br># gpg –import deepin-keyring.gpg<br># sudo gpg –export –armor 209088E7 | sudo apt-key add – sudo apt-key adv –keyserver keyserver.ubuntu.com –recv-keys425956BB3E31DF51 </p>
+</blockquote>
+</li>
+<li><p>安装微信（2.6.8版本）</p>
+<blockquote>
+<p># sudo apt update<br># sudo apt install deepin.com.wechat</p>
+</blockquote>
+</li>
+<li><p>更新微信方法</p>
+<blockquote>
+<p># mkdir /tmp/wechat<br># cd /tmp/wechat<br># wget <a href="https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe">https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe</a><br># env WINEPREFIX=~/.deepinwine/Deepin-WeChat deepin-wine WeChatSetup.exe</p>
+</blockquote>
+</li>
+<li><p>PS：sudo apt-cache search XXX 使用这个命令可搜索软件安装，QQ，TIM，钉钉，迅雷等可自取。</p>
+</li>
+</ul>
+<ul>
+<li>转载自：<a href="http://www.360doc.com/content/20/0814/03/2793098_930227541.shtml">http://www.360doc.com/content/20/0814/03/2793098_930227541.shtml</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>技巧</category>
+        <category>系统</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>“反范式”数据库设计之数据冗余架构设计与细节</title>
+    <url>/2020/09/06/%E2%80%9C%E5%8F%8D%E8%8C%83%E5%BC%8F%E2%80%9D%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1%E4%B9%8B%E6%95%B0%E6%8D%AE%E5%86%97%E4%BD%99%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E7%BB%86%E8%8A%82/</url>
+    <content><![CDATA[<h2 id="一、解决什么问题？"><a href="#一、解决什么问题？" class="headerlink" title="一、解决什么问题？"></a>一、解决什么问题？</h2><blockquote>
+<p>（1）数据量大<br>（2）需要水平切分<br>（3）一个schema上有多个字段的查询需求  </p>
+<p>举例：订单业务<br>Order(oid, info_detail)<br>T(buyer_id, seller_id, oid)<br>数据量大了怎么办？一个表一个库是存不下的，这个时候往往需要进行水平切分。订单表很容易进行水平切分，根据订单id进行表切分，查询的时候可以根据订单id直接定位到它水平切分到哪个库或者哪个表里面。但是关系表怎么切分呢？有买家id、卖家id,如果通过买家id来水平切分，保证同一个买家id的数据在一个库里或一个表里，根据买家id可以定位到这个买家有多少个订单id，这里如果要用卖家id来查询的话，就需要遍历多个库了；反之如果用卖家id来进行分库分表，同一个卖家的订单关系在一个库或一个表里，此时如果用买家id来查询订单，也需要遍历多个库或多个表。所以不管用买家id还是卖家id来进行水平切分，都有另外一种业务是无法满足的，如果要满足就需要扫描多库，在库的数量非常多数据量非常大的时候，扫描多库的性能是非常非常的低。</p>
+</blockquote>
+<h2 id="二、如何解决？"><a href="#二、如何解决？" class="headerlink" title="二、如何解决？"></a>二、如何解决？</h2><blockquote>
+<p> 如果用大学数据库学的范式来解决，几乎是无解的，所以在互联网的某些场景之下，只有逆范式或反范式来设计表结构，进行数据冗余才可以满足在多个业务场景下多个查询条件下的水平切分的需求。  </p>
+<p> <strong>冗余表</strong><br> Order(oid, info_detail)<br> T1(buyer_id, seller_id, oid)<br> T2(seller_id, buyer_id, oid)  </p>
+</blockquote>
+<h2 id="三、如何冗余？"><a href="#三、如何冗余？" class="headerlink" title="三、如何冗余？"></a>三、如何冗余？</h2><blockquote>
+<p><strong>（1）服务同步冗余</strong><br> 在进行表数据插入时，同时插入到T1,T2两张表中<br> 优点：1.不复杂; 2.不一致性概率低<br> 缺点：1.因为要插入两张表数据，处理业务时间增加； 2.仍然可能出现不一致</p>
+<p><strong>（2）服务异步冗余</strong><br> 增加一个消息队列，当插入T1表后，向消息队列中发送一个消息，然后由另外一个服务将数据插入到T2表中<br> 优点：访问一次数据库，与不冗余数据时时间相同<br> 缺点：1.复杂度增加，增加一个MQ； 2.消息发送成功不等于T2插入成功，此时查询T2会查询不到数据，但这个时间比较短，业务上往往是可以接受的； 3.不在一个分布式事务里，会出现数据不一致性  </p>
+<p><strong>（3）线下异步冗余</strong><br>  添加一个bin log，然后调用服务进行T2表的数据插入<br>  优点：两次写操作解耦<br>  缺点：1.有延时，可能在T2中查询不到数据； 2.会出现数据不一致性问题  </p>
+</blockquote>
+<h2 id="四、“原子性事务”，正向表和反向表谁先操作？"><a href="#四、“原子性事务”，正向表和反向表谁先操作？" class="headerlink" title="四、“原子性事务”，正向表和反向表谁先操作？"></a>四、“原子性事务”，正向表和反向表谁先操作？</h2><blockquote>
+<p>如果原子性被破坏，不一致出现，谁先做对业务的影响较小，就谁先执行</p>
+</blockquote>
+<h2 id="五、如何保证一致性？"><a href="#五、如何保证一致性？" class="headerlink" title="五、如何保证一致性？"></a>五、如何保证一致性？</h2><blockquote>
+<p>在大数据、高并发、延迟敏感的业务中，并不能实时保证一致性，而是尽可能的发现数据不一致性，然后保证最终一致性。</p>
+</blockquote>
+<h2 id="六、如何保证一致性？"><a href="#六、如何保证一致性？" class="headerlink" title="六、如何保证一致性？"></a>六、如何保证一致性？</h2><blockquote>
+<p> <strong>（1）全量数据扫描</strong><br>写一个离线程序，定时每天检查一次T1和T2表中数据是否一致，不一致的话进行补偿，使数据一致<br>优点：解耦<br>缺点：每天都需要大量检测，已经检测过的数据会重复检测，需要耗费的时间长，会导致数据不一致性的时间长</p>
+<p> <strong>（2）增量日志扫</strong><br>服务插入T1或T2表后向T1日志或T2日志中写一条日志数据，然后写一个离线的程序，对日志进行检测，发现不一致则进行补偿，使数据一致<br>优点：1.不会重复检测数据； 2.检测周期缩短； 3.线上影响比较低<br>缺点：时效性还是不高  </p>
+<p><strong>（3）实时消息对检测</strong><br> 增加一个消息队列，插入T1成功后就向消息队列中发送一条消息，插入T2d成功后，就向消息队列中发送一条消息，根据经验，5秒内能收到2条消息，如果未收到消息，则检测数据库数据是否一致<br> 缺点：复杂度高  </p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>架构师训练营</category>
+        <category>爆发期</category>
       </categories>
   </entry>
 </search>

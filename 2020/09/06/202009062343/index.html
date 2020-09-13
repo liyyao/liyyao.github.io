@@ -25,7 +25,7 @@
   <meta name="description" content="一、解决什么问题？ （1）数据量大（2）需要水平切分（3）一个schema上有多个字段的查询需求   举例：订单业务Order(oid, info_detail)T(buyer_id, seller_id, oid)数据量大了怎么办？一个表一个库是存不下的，这个时候往往需要进行水平切分。订单表很容易进行水平切分，根据订单id进行表切分，查询的时候可以根据订单id直接定位到它水平切分到哪个库或者哪个">
 <meta property="og:type" content="article">
 <meta property="og:title" content="“反范式”数据库设计之数据冗余架构设计与细节">
-<meta property="og:url" content="http://yoursite.com/2020/09/06/%E2%80%9C%E5%8F%8D%E8%8C%83%E5%BC%8F%E2%80%9D%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1%E4%B9%8B%E6%95%B0%E6%8D%AE%E5%86%97%E4%BD%99%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E7%BB%86%E8%8A%82/index.html">
+<meta property="og:url" content="http://yoursite.com/2020/09/06/202009062343/index.html">
 <meta property="og:site_name" content="一只特立独行的猫">
 <meta property="og:description" content="一、解决什么问题？ （1）数据量大（2）需要水平切分（3）一个schema上有多个字段的查询需求   举例：订单业务Order(oid, info_detail)T(buyer_id, seller_id, oid)数据量大了怎么办？一个表一个库是存不下的，这个时候往往需要进行水平切分。订单表很容易进行水平切分，根据订单id进行表切分，查询的时候可以根据订单id直接定位到它水平切分到哪个库或者哪个">
 <meta property="og:locale" content="zh_CN">
@@ -34,7 +34,7 @@
 <meta property="article:author" content="liyyao">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://yoursite.com/2020/09/06/%E2%80%9C%E5%8F%8D%E8%8C%83%E5%BC%8F%E2%80%9D%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1%E4%B9%8B%E6%95%B0%E6%8D%AE%E5%86%97%E4%BD%99%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E7%BB%86%E8%8A%82/">
+<link rel="canonical" href="http://yoursite.com/2020/09/06/202009062343/">
 
 
 <script id="page-configurations">
@@ -191,7 +191,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/06/%E2%80%9C%E5%8F%8D%E8%8C%83%E5%BC%8F%E2%80%9D%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1%E4%B9%8B%E6%95%B0%E6%8D%AE%E5%86%97%E4%BD%99%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E7%BB%86%E8%8A%82/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/09/06/202009062343/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -301,7 +301,10 @@
     <a href="/2020/08/30/linux-wechat/" rel="prev" title="Ubuntu/优麒麟安装deepin-wine微信的方法">
       <i class="fa fa-chevron-left"></i> Ubuntu/优麒麟安装deepin-wine微信的方法
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2020/09/13/202009132040/" rel="next" title="Dubbo集成Nacos">
+      Dubbo集成Nacos <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -376,14 +379,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">4</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
   </nav>
@@ -426,7 +429,7 @@
 
 <div class="theme-info">
   <div class="powered-by"></div>
-  <span class="post-count">博客全站共2.2k字</span>
+  <span class="post-count">博客全站共3.6k字</span>
 </div>
 <!--
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动

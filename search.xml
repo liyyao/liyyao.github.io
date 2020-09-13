@@ -1,6 +1,258 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>“反范式”数据库设计之数据冗余架构设计与细节</title>
+    <url>/2020/09/06/202009062343/</url>
+    <content><![CDATA[<h2 id="一、解决什么问题？"><a href="#一、解决什么问题？" class="headerlink" title="一、解决什么问题？"></a>一、解决什么问题？</h2><blockquote>
+<p>（1）数据量大<br>（2）需要水平切分<br>（3）一个schema上有多个字段的查询需求  </p>
+<p>举例：订单业务<br>Order(oid, info_detail)<br>T(buyer_id, seller_id, oid)<br>数据量大了怎么办？一个表一个库是存不下的，这个时候往往需要进行水平切分。订单表很容易进行水平切分，根据订单id进行表切分，查询的时候可以根据订单id直接定位到它水平切分到哪个库或者哪个表里面。但是关系表怎么切分呢？有买家id、卖家id,如果通过买家id来水平切分，保证同一个买家id的数据在一个库里或一个表里，根据买家id可以定位到这个买家有多少个订单id，这里如果要用卖家id来查询的话，就需要遍历多个库了；反之如果用卖家id来进行分库分表，同一个卖家的订单关系在一个库或一个表里，此时如果用买家id来查询订单，也需要遍历多个库或多个表。所以不管用买家id还是卖家id来进行水平切分，都有另外一种业务是无法满足的，如果要满足就需要扫描多库，在库的数量非常多数据量非常大的时候，扫描多库的性能是非常非常的低。</p>
+</blockquote>
+<h2 id="二、如何解决？"><a href="#二、如何解决？" class="headerlink" title="二、如何解决？"></a>二、如何解决？</h2><blockquote>
+<p> 如果用大学数据库学的范式来解决，几乎是无解的，所以在互联网的某些场景之下，只有逆范式或反范式来设计表结构，进行数据冗余才可以满足在多个业务场景下多个查询条件下的水平切分的需求。  </p>
+<p> <strong>冗余表</strong><br> Order(oid, info_detail)<br> T1(buyer_id, seller_id, oid)<br> T2(seller_id, buyer_id, oid)  </p>
+</blockquote>
+<h2 id="三、如何冗余？"><a href="#三、如何冗余？" class="headerlink" title="三、如何冗余？"></a>三、如何冗余？</h2><blockquote>
+<p><strong>（1）服务同步冗余</strong><br> 在进行表数据插入时，同时插入到T1,T2两张表中<br> 优点：1.不复杂; 2.不一致性概率低<br> 缺点：1.因为要插入两张表数据，处理业务时间增加； 2.仍然可能出现不一致</p>
+<p><strong>（2）服务异步冗余</strong><br> 增加一个消息队列，当插入T1表后，向消息队列中发送一个消息，然后由另外一个服务将数据插入到T2表中<br> 优点：访问一次数据库，与不冗余数据时时间相同<br> 缺点：1.复杂度增加，增加一个MQ； 2.消息发送成功不等于T2插入成功，此时查询T2会查询不到数据，但这个时间比较短，业务上往往是可以接受的； 3.不在一个分布式事务里，会出现数据不一致性  </p>
+<p><strong>（3）线下异步冗余</strong><br>  添加一个bin log，然后调用服务进行T2表的数据插入<br>  优点：两次写操作解耦<br>  缺点：1.有延时，可能在T2中查询不到数据； 2.会出现数据不一致性问题  </p>
+</blockquote>
+<h2 id="四、“原子性事务”，正向表和反向表谁先操作？"><a href="#四、“原子性事务”，正向表和反向表谁先操作？" class="headerlink" title="四、“原子性事务”，正向表和反向表谁先操作？"></a>四、“原子性事务”，正向表和反向表谁先操作？</h2><blockquote>
+<p>如果原子性被破坏，不一致出现，谁先做对业务的影响较小，就谁先执行</p>
+</blockquote>
+<h2 id="五、如何保证一致性？"><a href="#五、如何保证一致性？" class="headerlink" title="五、如何保证一致性？"></a>五、如何保证一致性？</h2><blockquote>
+<p>在大数据、高并发、延迟敏感的业务中，并不能实时保证一致性，而是尽可能的发现数据不一致性，然后保证最终一致性。</p>
+</blockquote>
+<h2 id="六、如何保证一致性？"><a href="#六、如何保证一致性？" class="headerlink" title="六、如何保证一致性？"></a>六、如何保证一致性？</h2><blockquote>
+<p> <strong>（1）全量数据扫描</strong><br>写一个离线程序，定时每天检查一次T1和T2表中数据是否一致，不一致的话进行补偿，使数据一致<br>优点：解耦<br>缺点：每天都需要大量检测，已经检测过的数据会重复检测，需要耗费的时间长，会导致数据不一致性的时间长</p>
+<p> <strong>（2）增量日志扫</strong><br>服务插入T1或T2表后向T1日志或T2日志中写一条日志数据，然后写一个离线的程序，对日志进行检测，发现不一致则进行补偿，使数据一致<br>优点：1.不会重复检测数据； 2.检测周期缩短； 3.线上影响比较低<br>缺点：时效性还是不高  </p>
+<p><strong>（3）实时消息对检测</strong><br> 增加一个消息队列，插入T1成功后就向消息队列中发送一条消息，插入T2d成功后，就向消息队列中发送一条消息，根据经验，5秒内能收到2条消息，如果未收到消息，则检测数据库数据是否一致<br> 缺点：复杂度高  </p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>架构师训练营</category>
+        <category>爆发期</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Dubbo集成Nacos</title>
+    <url>/2020/09/13/202009132040/</url>
+    <content><![CDATA[<h3 id="deom框架"><a href="#deom框架" class="headerlink" title="deom框架"></a>deom框架</h3><blockquote>
+<p>三个module,一个提供api，一个提供api的实现，一个调用方。工程结构如下图所示。  </p>
+</blockquote>
+<h4 id="一、api"><a href="#一、api" class="headerlink" title="一、api"></a>一、api</h4><blockquote>
+<p>提供接口API  </p>
+<pre><code>public interface ServiceA &#123;
+    String greet(String name);
+&#125;</code></pre>
+</blockquote>
+<h4 id="二、服务提供方ServiceA"><a href="#二、服务提供方ServiceA" class="headerlink" title="二、服务提供方ServiceA"></a>二、服务提供方ServiceA</h4><blockquote>
+<p><strong>（1）pom.xml配置</strong>  </p>
+<pre><code>&lt;properties&gt;
+    &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+    &lt;maven.compiler.source&gt;1.8&lt;/maven.compiler.source&gt;
+    &lt;maven.compiler.target&gt;1.8&lt;/maven.compiler.target&gt;
+    &lt;spring-cloud.version&gt;Greenwich.SR2&lt;/spring-cloud.version&gt;
+&lt;/properties&gt;
+&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-starter&lt;/artifactId&gt;
+        &lt;version&gt;2.1.2.RELEASE&lt;/version&gt;
+        &lt;exclusions&gt;
+            &lt;exclusion&gt;
+                &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-cloud-context&lt;/artifactId&gt;
+            &lt;/exclusion&gt;
+        &lt;/exclusions&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-starter-dubbo&lt;/artifactId&gt;
+        &lt;version&gt;2.1.2.RELEASE&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.liyyao.demo&lt;/groupId&gt;
+        &lt;artifactId&gt;demo-dubbo-nacos-api&lt;/artifactId&gt;
+        &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-alibaba-nacos-discovery&lt;/artifactId&gt;
+        &lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
+        &lt;exclusions&gt;
+            &lt;exclusion&gt;
+                &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-cloud-context&lt;/artifactId&gt;
+            &lt;/exclusion&gt;
+        &lt;/exclusions&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-context&lt;/artifactId&gt;
+        &lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+&lt;dependencyManagement&gt;
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-dependencies&lt;/artifactId&gt;
+            &lt;version&gt;$&#123;spring-cloud.version&#125;&lt;/version&gt;
+            &lt;type&gt;pom&lt;/type&gt;
+            &lt;scope&gt;import&lt;/scope&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;
+            &lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
+            &lt;type&gt;pom&lt;/type&gt;
+            &lt;scope&gt;import&lt;/scope&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-alibaba-dependencies&lt;/artifactId&gt;
+            &lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
+            &lt;type&gt;pom&lt;/type&gt;
+            &lt;scope&gt;import&lt;/scope&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;  </code></pre>
+</blockquote>
+<blockquote>
+<p><strong>（2）application.properties配置</strong>  </p>
+<pre><code>spring.application.name=demo-dubbo-nacos-ServiceA
+dubbo.scan.base-packages=com.liyyao.demo.dubbo.nacos
+dubbo.protocol.name=dubbo
+dubbo.protocol.port=20880
+dubbo.registry.address=spring-cloud://localhost
+spring.cloud.nacos.discovery.server-addr=101.133.233.66:8848,101.133.175.55:8848,101.133.172.57:8848  </code></pre>
+</blockquote>
+<blockquote>
+<p><strong>（3）api接口的实现</strong>  </p>
+<pre><code>@Service(
+        version = &quot;1.0.0&quot;,
+        interfaceClass = ServiceA.class,
+        cluster = &quot;failfast&quot;,
+        loadbalance = &quot;roundrobin&quot;
+)
+public class ServiceAImpl implements ServiceA &#123;
+    public String greet(String name) &#123;
+        return &quot;hello, &quot; + name;
+    &#125;
+&#125;  </code></pre>
+</blockquote>
+<blockquote>
+<p><strong>（4）启动类</strong>  </p>
+<pre><code>@SpringBootApplication
+public class Application &#123;
+    public static void main(String[] args) &#123;
+        SpringApplication.run(Application.class, args);
+    &#125;
+&#125;  </code></pre>
+</blockquote>
+<h4 id="三、服务消费方ServiceB"><a href="#三、服务消费方ServiceB" class="headerlink" title="三、服务消费方ServiceB"></a>三、服务消费方ServiceB</h4><blockquote>
+<p><strong>（1）pom.xml配置</strong>  </p>
+<pre><code>&lt;properties&gt;
+    &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+    &lt;maven.compiler.source&gt;1.8&lt;/maven.compiler.source&gt;
+    &lt;maven.compiler.target&gt;1.8&lt;/maven.compiler.target&gt;
+&lt;/properties&gt;
+&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+        &lt;version&gt;2.1.3.RELEASE&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-starter&lt;/artifactId&gt;
+        &lt;version&gt;2.1.2.RELEASE&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-starter-dubbo&lt;/artifactId&gt;
+        &lt;version&gt;2.1.2.RELEASE&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.zhss.demo&lt;/groupId&gt;
+        &lt;artifactId&gt;demo-dubbo-nacos-api&lt;/artifactId&gt;
+        &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-alibaba-nacos-discovery&lt;/artifactId&gt;
+        &lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
+        &lt;exclusions&gt;
+            &lt;exclusion&gt;
+                &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-cloud-context&lt;/artifactId&gt;
+            &lt;/exclusion&gt;
+        &lt;/exclusions&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-context&lt;/artifactId&gt;
+        &lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.apache.httpcomponents&lt;/groupId&gt;
+        &lt;artifactId&gt;httpclient&lt;/artifactId&gt;
+        &lt;version&gt;4.5.5&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+&lt;dependencyManagement&gt;
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-dependencies&lt;/artifactId&gt;
+            &lt;version&gt;$&#123;spring-cloud.version&#125;&lt;/version&gt;
+            &lt;type&gt;pom&lt;/type&gt;
+            &lt;scope&gt;import&lt;/scope&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+&lt;/dependencyManagement&gt;  </code></pre>
+</blockquote>
+<blockquote>
+<p><strong>（2）application.properties配置</strong>  </p>
+<pre><code>spring.application.name=demo-dubbo-nacos-ServiceB
+dubbo.cloud.subscribed-services=demo-dubbo-nacos-ServiceA
+dubbo.scan.base-packages=com.liyyao.demo.dubbo.nacos
+spring.cloud.nacos.discovery.server-addr=101.133.233.66:8848,101.133.175.55:8848,101.133.172.57:8848  </code></pre>
+</blockquote>
+<blockquote>
+<p><strong>（3）服用ServiceA的方法</strong></p>
+<pre><code>@RestController
+public class TestController &#123;
+    @Reference(version = &quot;1.0.0&quot;,
+            interfaceClass = ServiceA.class,
+            cluster = &quot;failfast&quot;)
+    private ServiceA serviceA;
+
+    @GetMapping(&quot;/greet&quot;)
+    public String greet(String name) &#123;
+        return serviceA.greet(name);
+    &#125;
+&#125;  </code></pre>
+</blockquote>
+<blockquote>
+<p><strong>（4）启动类</strong></p>
+<pre><code>@SpringBootApplication
+public class Application &#123;
+    public static void main(String[] args) &#123;
+        SpringApplication.run(Application.class, args);
+    &#125;
+&#125;  </code></pre>
+</blockquote>
+<h4 id="四、测试"><a href="#四、测试" class="headerlink" title="四、测试"></a>四、测试</h4><blockquote>
+<p>启动成功后，打开浏览器，输入localhost:8080/great?name=lee可访问成功（name的参数输入什么，页面中显示什么）如下图所示。</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>SpringCloud</category>
+        <category>dubbo</category>
+      </categories>
+  </entry>
+  <entry>
     <title>阿里云nacos集群部署</title>
     <url>/2020/08/29/aliyun-nacos/</url>
     <content><![CDATA[<h2 id="1-准备4台linux服务器"><a href="#1-准备4台linux服务器" class="headerlink" title="1. 准备4台linux服务器"></a>1. 准备4台linux服务器</h2><ul>
@@ -33,7 +285,12 @@
 </li>
 <li><p>修改数据库密码</p>
 <blockquote>
-<p>mysql&gt; SET PASSWORD = PASSWORD(‘12345678’);<br>mysql&gt; ALTER USER ‘root’@’localhost’ PASSWORD EXPIRE NEVER;<br>mysql&gt; FLUSH PRIVILEGES;</p>
+<p>mysql&gt; SET PASSWORD = PASSWORD(‘12345678’);<br>mysql&gt; ALTER USER ‘root’@’localhost’ PASSWORD EXPIRE NEVER;<br>mysql&gt; FLUSH PRIVILEGES;  </p>
+</blockquote>
+</li>
+<li><p>如果提示密码不符合策略，做如下操作再设置密码  </p>
+<blockquote>
+<p>mysql&gt; set global validate_password_policy=0;<br>mysql&gt; set global validate_password_length=1;</p>
 </blockquote>
 </li>
 <li><p>重新登录数据库，设置远程连接</p>
@@ -48,12 +305,12 @@
 </li>
 <li><p>为firewalld添加开放端口</p>
 <blockquote>
-<p>添加mysql端口3306<br> # firewall-cmd –zone=public –add-port=3306/tcp –permanent<br> # firewall-cmd –reload</p>
+<p>添加mysql端口3306<br> # systemctl start firewalld<br> # firewall-cmd –zone=public –add-port=3306/tcp –permanent<br> # firewall-cmd –reload</p>
 </blockquote>
 </li>
 <li><p>更改mysql语言</p>
 <blockquote>
-<p> 首先重新登录mysql,然后输入status,可以看到Server characterset: latinl，不是utf-8;<br> 出mysql, vi /etc/my.cnf新增4行代码<br> [client]<br> default-character-set=utf8<br> character-set-server=utf8<br> collation-server=utf8_general_ci<br> 保存成功后，重启mysql,然后输入status就会发现变化了</p>
+<p> 首先重新登录mysql,然后输入status,可以看到Server characterset: latinl，不是utf-8;<br> 出mysql, vi /etc/my.cnf新增下面代码<br> character-set-server=utf8<br> collation-server=utf8_general_ci<br> 保存成功后，重启mysql,然后输入status就会发现变化了</p>
 </blockquote>
 </li>
 </ul>
@@ -61,7 +318,7 @@
 <p>配置hosts<br># vi /etc/hosts<br>配置本机的hostname到ip地址的映射</p>
 </blockquote>
 <h3 id="（2）安装JDK"><a href="#（2）安装JDK" class="headerlink" title="（2）安装JDK"></a>（2）安装JDK</h3><blockquote>
-<p>到ORACLE官网下载linux版本的jdk:<a href="https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html">https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html</a><br>上传jdk到三台服务器上，然后安装  # rpm -ivh jdk-8u131-linux-x64.rpm<br>配置jdk相关环境变量 # vi /etc/bashrc<br>export JAVA_HOME=/usr/java/xxx<br>export PATH=$PATH:$JAVA_HOME/bin<br>source /etc/bashrc<br>测试jdc安装是否成功：java -version</p>
+<p>到ORACLE官网下载linux版本的jdk:<a href="https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html">https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html</a><br>上传jdk到三台服务器上，然后安装  # rpm -ivh jdk-8u131-linux-x64.rpm<br>配置jdk相关环境变量 # vi /etc/bashrc<br>export JAVA_HOME=/usr/java/jdk1.8.0_131<br>export PATH=$PATH:$JAVA_HOME/bin<br>source /etc/bashrc<br>测试jdc安装是否成功：java -version</p>
 </blockquote>
 <h3 id="（3）下载nacos-server-1-4版本的源码"><a href="#（3）下载nacos-server-1-4版本的源码" class="headerlink" title="（3）下载nacos-server-1.4版本的源码"></a>（3）下载nacos-server-1.4版本的源码</h3><pre><code># git clone https://github.com/alibaba/nacos.git
 # cd nacos
@@ -96,6 +353,13 @@
 <li>访问nacos  <ul>
 <li>在浏览器地址栏输入nacos集群中的一个ip地址，192.168.xxx.xxx:8848/nacos/index.html即可跳转到nacos登录页面，默认用户名和密码都是nacos，登录成功后可看到nacos相关信息。</li>
 </ul>
+</li>
+</ul>
+<h2 id="4-问题"><a href="#4-问题" class="headerlink" title="4. 问题"></a>4. 问题</h2><h3 id="（1）nacos启动时nacos-log中报xxxIP未加入到集群list中的异常"><a href="#（1）nacos启动时nacos-log中报xxxIP未加入到集群list中的异常" class="headerlink" title="（1）nacos启动时nacos.log中报xxxIP未加入到集群list中的异常"></a>（1）nacos启动时nacos.log中报xxxIP未加入到集群list中的异常</h3><ul>
+<li>阿里云的实例有公有ip和私有ip，在nacos的cluster.conf配置文件中配置的是公有ip,但在启动时，nacos会将本机的私有ip自动加入到cluster.conf文件中，导致启动时报xxxIP未加入到集群list中的异常，虽然在页面上可以正常进入到nacos管理页面，但在做dubbo集成时，dubbo的服务调用方会注册不成功。</li>
+<li>目前的解决办法<blockquote>
+<p>修改nacos的启动文件，添加本地ip地址配置<br># vi startup.sh<br>找到 JVM Configuration 这部分, 在集群参数里增加 -Dnacos.server.ip=xx<br>JAVA_OPT=”${JAVA_OPT} -Dnacos.server.ip=xx.xx.xx.xx”</p>
+</blockquote>
 </li>
 </ul>
 ]]></content>
@@ -143,39 +407,6 @@
       <categories>
         <category>技巧</category>
         <category>系统</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>“反范式”数据库设计之数据冗余架构设计与细节</title>
-    <url>/2020/09/06/%E2%80%9C%E5%8F%8D%E8%8C%83%E5%BC%8F%E2%80%9D%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1%E4%B9%8B%E6%95%B0%E6%8D%AE%E5%86%97%E4%BD%99%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E7%BB%86%E8%8A%82/</url>
-    <content><![CDATA[<h2 id="一、解决什么问题？"><a href="#一、解决什么问题？" class="headerlink" title="一、解决什么问题？"></a>一、解决什么问题？</h2><blockquote>
-<p>（1）数据量大<br>（2）需要水平切分<br>（3）一个schema上有多个字段的查询需求  </p>
-<p>举例：订单业务<br>Order(oid, info_detail)<br>T(buyer_id, seller_id, oid)<br>数据量大了怎么办？一个表一个库是存不下的，这个时候往往需要进行水平切分。订单表很容易进行水平切分，根据订单id进行表切分，查询的时候可以根据订单id直接定位到它水平切分到哪个库或者哪个表里面。但是关系表怎么切分呢？有买家id、卖家id,如果通过买家id来水平切分，保证同一个买家id的数据在一个库里或一个表里，根据买家id可以定位到这个买家有多少个订单id，这里如果要用卖家id来查询的话，就需要遍历多个库了；反之如果用卖家id来进行分库分表，同一个卖家的订单关系在一个库或一个表里，此时如果用买家id来查询订单，也需要遍历多个库或多个表。所以不管用买家id还是卖家id来进行水平切分，都有另外一种业务是无法满足的，如果要满足就需要扫描多库，在库的数量非常多数据量非常大的时候，扫描多库的性能是非常非常的低。</p>
-</blockquote>
-<h2 id="二、如何解决？"><a href="#二、如何解决？" class="headerlink" title="二、如何解决？"></a>二、如何解决？</h2><blockquote>
-<p> 如果用大学数据库学的范式来解决，几乎是无解的，所以在互联网的某些场景之下，只有逆范式或反范式来设计表结构，进行数据冗余才可以满足在多个业务场景下多个查询条件下的水平切分的需求。  </p>
-<p> <strong>冗余表</strong><br> Order(oid, info_detail)<br> T1(buyer_id, seller_id, oid)<br> T2(seller_id, buyer_id, oid)  </p>
-</blockquote>
-<h2 id="三、如何冗余？"><a href="#三、如何冗余？" class="headerlink" title="三、如何冗余？"></a>三、如何冗余？</h2><blockquote>
-<p><strong>（1）服务同步冗余</strong><br> 在进行表数据插入时，同时插入到T1,T2两张表中<br> 优点：1.不复杂; 2.不一致性概率低<br> 缺点：1.因为要插入两张表数据，处理业务时间增加； 2.仍然可能出现不一致</p>
-<p><strong>（2）服务异步冗余</strong><br> 增加一个消息队列，当插入T1表后，向消息队列中发送一个消息，然后由另外一个服务将数据插入到T2表中<br> 优点：访问一次数据库，与不冗余数据时时间相同<br> 缺点：1.复杂度增加，增加一个MQ； 2.消息发送成功不等于T2插入成功，此时查询T2会查询不到数据，但这个时间比较短，业务上往往是可以接受的； 3.不在一个分布式事务里，会出现数据不一致性  </p>
-<p><strong>（3）线下异步冗余</strong><br>  添加一个bin log，然后调用服务进行T2表的数据插入<br>  优点：两次写操作解耦<br>  缺点：1.有延时，可能在T2中查询不到数据； 2.会出现数据不一致性问题  </p>
-</blockquote>
-<h2 id="四、“原子性事务”，正向表和反向表谁先操作？"><a href="#四、“原子性事务”，正向表和反向表谁先操作？" class="headerlink" title="四、“原子性事务”，正向表和反向表谁先操作？"></a>四、“原子性事务”，正向表和反向表谁先操作？</h2><blockquote>
-<p>如果原子性被破坏，不一致出现，谁先做对业务的影响较小，就谁先执行</p>
-</blockquote>
-<h2 id="五、如何保证一致性？"><a href="#五、如何保证一致性？" class="headerlink" title="五、如何保证一致性？"></a>五、如何保证一致性？</h2><blockquote>
-<p>在大数据、高并发、延迟敏感的业务中，并不能实时保证一致性，而是尽可能的发现数据不一致性，然后保证最终一致性。</p>
-</blockquote>
-<h2 id="六、如何保证一致性？"><a href="#六、如何保证一致性？" class="headerlink" title="六、如何保证一致性？"></a>六、如何保证一致性？</h2><blockquote>
-<p> <strong>（1）全量数据扫描</strong><br>写一个离线程序，定时每天检查一次T1和T2表中数据是否一致，不一致的话进行补偿，使数据一致<br>优点：解耦<br>缺点：每天都需要大量检测，已经检测过的数据会重复检测，需要耗费的时间长，会导致数据不一致性的时间长</p>
-<p> <strong>（2）增量日志扫</strong><br>服务插入T1或T2表后向T1日志或T2日志中写一条日志数据，然后写一个离线的程序，对日志进行检测，发现不一致则进行补偿，使数据一致<br>优点：1.不会重复检测数据； 2.检测周期缩短； 3.线上影响比较低<br>缺点：时效性还是不高  </p>
-<p><strong>（3）实时消息对检测</strong><br> 增加一个消息队列，插入T1成功后就向消息队列中发送一条消息，插入T2d成功后，就向消息队列中发送一条消息，根据经验，5秒内能收到2条消息，如果未收到消息，则检测数据库数据是否一致<br> 缺点：复杂度高  </p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>架构师训练营</category>
-        <category>爆发期</category>
       </categories>
   </entry>
 </search>

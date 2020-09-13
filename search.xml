@@ -37,7 +37,7 @@
     <title>Dubbo集成Nacos</title>
     <url>/2020/09/13/202009132040/</url>
     <content><![CDATA[<h3 id="deom框架"><a href="#deom框架" class="headerlink" title="deom框架"></a>deom框架</h3><blockquote>
-<p>三个module,一个提供api，一个提供api的实现，一个调用方。工程结构如下图所示。  </p>
+<p>三个module,一个提供api，一个提供api的实现，一个调用方。工程结构如下图所示。<br><img src="/2020/09/13/202009132040/1.png" alt="工程结构">  </p>
 </blockquote>
 <h4 id="一、api"><a href="#一、api" class="headerlink" title="一、api"></a>一、api</h4><blockquote>
 <p>提供接口API  </p>
@@ -244,7 +244,7 @@ public class Application &#123;
 &#125;  </code></pre>
 </blockquote>
 <h4 id="四、测试"><a href="#四、测试" class="headerlink" title="四、测试"></a>四、测试</h4><blockquote>
-<p>启动成功后，打开浏览器，输入localhost:8080/great?name=lee可访问成功（name的参数输入什么，页面中显示什么）如下图所示。</p>
+<p>启动成功后，打开浏览器，输入localhost:8080/great?name=lee可访问成功（name的参数输入什么，页面中显示什么）如下图所示。<br><img src="/2020/09/13/202009132040/2.png" alt="测试结果"></p>
 </blockquote>
 ]]></content>
       <categories>

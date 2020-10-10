@@ -268,47 +268,6 @@ public class Application &#123;
       </tags>
   </entry>
   <entry>
-    <title>Ubuntu/优麒麟安装deepin-wine微信的方法</title>
-    <url>/2020/08/30/linux-wechat/</url>
-    <content><![CDATA[<h2 id="ubuntu-16-04及以上可用。"><a href="#ubuntu-16-04及以上可用。" class="headerlink" title="ubuntu 16.04及以上可用。"></a>ubuntu 16.04及以上可用。</h2><ul>
-<li><p>32位支持</p>
-<blockquote>
-<p># sudo dpkg –add-architecture i386</p>
-</blockquote>
-</li>
-<li><p>添加源</p>
-<blockquote>
-<p># sudo vim /etc/apt/sources.list<br># deb <a href="https://mirrors.aliyun.com/deepin/">https://mirrors.aliyun.com/deepin/</a> panda main contrib non-free<br># deb-src <a href="https://mirrors.aliyun.com/deepin/">https://mirrors.aliyun.com/deepin/</a> panda main contrib non-free<br># deb <a href="https://mirrors.aliyun.com/deepin/">https://mirrors.aliyun.com/deepin/</a> panda main contrib non-free  </p>
-</blockquote>
-</li>
-<li><p>保存后为上面的源加入许可证</p>
-<blockquote>
-<p># wget <a href="https://mirrors.aliyun.com/deepin/project/deepin-keyring.gpg">https://mirrors.aliyun.com/deepin/project/deepin-keyring.gpg</a><br># gpg –import deepin-keyring.gpg<br># sudo gpg –export –armor 209088E7 | sudo apt-key add – sudo apt-key adv –keyserver keyserver.ubuntu.com –recv-keys425956BB3E31DF51 </p>
-</blockquote>
-</li>
-<li><p>安装微信（2.6.8版本）</p>
-<blockquote>
-<p># sudo apt update<br># sudo apt install deepin.com.wechat</p>
-</blockquote>
-</li>
-<li><p>更新微信方法</p>
-<blockquote>
-<p># mkdir /tmp/wechat<br># cd /tmp/wechat<br># wget <a href="https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe">https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe</a><br># env WINEPREFIX=~/.deepinwine/Deepin-WeChat deepin-wine WeChatSetup.exe</p>
-</blockquote>
-</li>
-<li><p>PS：sudo apt-cache search XXX 使用这个命令可搜索软件安装，QQ，TIM，钉钉，迅雷等可自取。</p>
-</li>
-</ul>
-<ul>
-<li>转载自：<a href="http://www.360doc.com/content/20/0814/03/2793098_930227541.shtml">http://www.360doc.com/content/20/0814/03/2793098_930227541.shtml</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>技巧</category>
-        <category>系统</category>
-      </categories>
-  </entry>
-  <entry>
     <title>阿里云nacos集群部署</title>
     <url>/2020/08/29/aliyun-nacos/</url>
     <content><![CDATA[<h2 id="1-准备4台linux服务器"><a href="#1-准备4台linux服务器" class="headerlink" title="1. 准备4台linux服务器"></a>1. 准备4台linux服务器</h2><ul>
@@ -422,6 +381,47 @@ public class Application &#123;
       <categories>
         <category>SpringCloud</category>
         <category>nacos</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Ubuntu/优麒麟安装deepin-wine微信的方法</title>
+    <url>/2020/08/30/linux-wechat/</url>
+    <content><![CDATA[<h2 id="ubuntu-16-04及以上可用。"><a href="#ubuntu-16-04及以上可用。" class="headerlink" title="ubuntu 16.04及以上可用。"></a>ubuntu 16.04及以上可用。</h2><ul>
+<li><p>32位支持</p>
+<blockquote>
+<p># sudo dpkg –add-architecture i386</p>
+</blockquote>
+</li>
+<li><p>添加源</p>
+<blockquote>
+<p># sudo vim /etc/apt/sources.list<br># deb <a href="https://mirrors.aliyun.com/deepin/">https://mirrors.aliyun.com/deepin/</a> panda main contrib non-free<br># deb-src <a href="https://mirrors.aliyun.com/deepin/">https://mirrors.aliyun.com/deepin/</a> panda main contrib non-free<br># deb <a href="https://mirrors.aliyun.com/deepin/">https://mirrors.aliyun.com/deepin/</a> panda main contrib non-free  </p>
+</blockquote>
+</li>
+<li><p>保存后为上面的源加入许可证</p>
+<blockquote>
+<p># wget <a href="https://mirrors.aliyun.com/deepin/project/deepin-keyring.gpg">https://mirrors.aliyun.com/deepin/project/deepin-keyring.gpg</a><br># gpg –import deepin-keyring.gpg<br># sudo gpg –export –armor 209088E7 | sudo apt-key add – sudo apt-key adv –keyserver keyserver.ubuntu.com –recv-keys425956BB3E31DF51 </p>
+</blockquote>
+</li>
+<li><p>安装微信（2.6.8版本）</p>
+<blockquote>
+<p># sudo apt update<br># sudo apt install deepin.com.wechat</p>
+</blockquote>
+</li>
+<li><p>更新微信方法</p>
+<blockquote>
+<p># mkdir /tmp/wechat<br># cd /tmp/wechat<br># wget <a href="https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe">https://dldir1.qq.com/weixin/Windows/WeChatSetup.exe</a><br># env WINEPREFIX=~/.deepinwine/Deepin-WeChat deepin-wine WeChatSetup.exe</p>
+</blockquote>
+</li>
+<li><p>PS：sudo apt-cache search XXX 使用这个命令可搜索软件安装，QQ，TIM，钉钉，迅雷等可自取。</p>
+</li>
+</ul>
+<ul>
+<li>转载自：<a href="http://www.360doc.com/content/20/0814/03/2793098_930227541.shtml">http://www.360doc.com/content/20/0814/03/2793098_930227541.shtml</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>技巧</category>
+        <category>系统</category>
       </categories>
   </entry>
 </search>

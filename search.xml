@@ -34,6 +34,137 @@
       </categories>
   </entry>
   <entry>
+    <title>转正小记</title>
+    <url>/2020/10/10/202010102013/</url>
+    <content><![CDATA[<p>&emsp;&emsp;距离4月7号入职已过半年，今天终于要转正了，虽然现在比较佛系，但还是开心一下，毕竟转正后每月工资又多了些，现在就这点儿出息了，哈哈。</p>
+<p>&emsp;&emsp;今天下午，生平第一次当着十几个人的面演讲ppt，足足讲了40分钟，真是紧张的要死，全程只顾着讲自己的，完全没有节奏，就像小学生背课文一样，哗啦啦一下将准备的东西都倒出来，也管不上听众的感受，自己也是身不由己，从没锻炼过，还有公众讲话恐惧症，不颤音不断片已经够好的了，以后还是要多多锻炼。</p>
+<p>&emsp;&emsp;今晚可以睡个好觉了，这两天快被这个转正演讲折磨死了，从开始写ppt就一直处于紧张状态，跟打仗备战似的，时不时的进行演练一遍，昨晚重新改ppt加内容再过一遍弄到了1点，躺床上还是翻来覆去睡不着的在想着哪个点要怎样讲，好不容易睡着了梦里还是在和ppt拧巴，早上6点多醒了满脑子都是演讲的内容，脑子里再过一遍，公交地铁上书也没心看，一直在脑海里演练演讲的内容，上班后工作也不在状态也还在一直想着下午要怎么讲，中午吃饭和小伙伴说话都紧张的话都说不利索，吃完饭回来午睡又担心的睡不着手心开始冒汗，下午努力投入到工作中转移注意力，终于在5点开场进行了演讲，第一次第一次，激动、紧张，虽然全都是平时一起工作的同事，大家都很熟悉了，但心理就是这样不设防的塌陷，讲完之后如释重负，没有感动的想哭，只是想手舞足蹈，听着小伙伴们的评论，都是一个劲的夸赞，突然感觉很幸福，觉得自己在这个团队中能将自己的心理问题给治愈，能完善自己的人格缺陷，真真是太好了。最后还是丁总看的透澈，就是自己经历的太少了，踩的坑太少了，而又太脸皮子太薄，以后要多跳坑，有坑就跳，扛过了这波，剩下的就都不是事了。</p>
+<p>&emsp;&emsp;生活总要有点仪式感，相信今天过后，自己可以朝着自己的展望脚踏实地的奋斗~</p>
+]]></content>
+      <categories>
+        <category>随笔</category>
+      </categories>
+      <tags>
+        <tag>生活</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>阿里云nacos集群部署</title>
+    <url>/2020/08/29/aliyun-nacos/</url>
+    <content><![CDATA[<h2 id="1-准备4台linux服务器"><a href="#1-准备4台linux服务器" class="headerlink" title="1. 准备4台linux服务器"></a>1. 准备4台linux服务器</h2><ul>
+<li>准备阿里云服务器4台，3台用做nacos集群，1台用做mysql数据库</li>
+<li>配置阿里云服务器网络安全组，打开入网端口（8848）</li>
+</ul>
+<h2 id="2-安装mysql"><a href="#2-安装mysql" class="headerlink" title="2. 安装mysql"></a>2. 安装mysql</h2><h3 id="（1）下载并安装MySQL官方的Yum-Repository-Mysql版本-5-7-14"><a href="#（1）下载并安装MySQL官方的Yum-Repository-Mysql版本-5-7-14" class="headerlink" title="（1）下载并安装MySQL官方的Yum Repository, Mysql版本 5.7.14"></a>（1）下载并安装MySQL官方的Yum Repository, Mysql版本 5.7.14</h3><pre><code># wget -i -c https://dev.mysql.com/get/mysql57-community-release-el7-10.noarch.rpm
+# yum -y install mysql57-community-release-el7-10.noarch.rpm</code></pre>
+<h3 id="（2）安装MySQL-服务器"><a href="#（2）安装MySQL-服务器" class="headerlink" title="（2）安装MySQL 服务器"></a>（2）安装MySQL 服务器</h3><pre><code># yum -y install mysql-community-server</code></pre>
+<h3 id="（3）MySQL数据库设置"><a href="#（3）MySQL数据库设置" class="headerlink" title="（3）MySQL数据库设置"></a>（3）MySQL数据库设置</h3><ul>
+<li><p>首先启动MySQL  </p>
+<blockquote>
+<p> # systemctl start mysqld.service</p>
+</blockquote>
+</li>
+<li><p>查看MySQL运行状态</p>
+<blockquote>
+<p> # systemctl status mysqld.service</p>
+</blockquote>
+</li>
+<li><p>找root用户密码</p>
+<blockquote>
+<p> # grep “password” /var/log/mysqld.log</p>
+</blockquote>
+</li>
+<li><p>进入数据库</p>
+<blockquote>
+<p> # mysql -uroot -p</p>
+</blockquote>
+</li>
+<li><p>修改数据库密码</p>
+<blockquote>
+<p>mysql&gt; SET PASSWORD = PASSWORD(‘12345678’);<br>mysql&gt; ALTER USER ‘root’@’localhost’ PASSWORD EXPIRE NEVER;<br>mysql&gt; FLUSH PRIVILEGES;  </p>
+</blockquote>
+</li>
+<li><p>如果提示密码不符合策略，做如下操作再设置密码  </p>
+<blockquote>
+<p>mysql&gt; set global validate_password_policy=0;<br>mysql&gt; set global validate_password_length=1;</p>
+</blockquote>
+</li>
+<li><p>重新登录数据库，设置远程连接</p>
+<blockquote>
+<p>mysql&gt; use mysql;<br>mysql&gt; update user set host = ‘%’ where user = ‘root’;<br>mysql&gt; FLUSH PRIVILEGES;</p>
+</blockquote>
+</li>
+<li><p>进行远程连接测试</p>
+<blockquote>
+<p>本地进行连接测试</p>
+</blockquote>
+</li>
+<li><p>为firewalld添加开放端口</p>
+<blockquote>
+<p>添加mysql端口3306<br> # systemctl start firewalld<br> # firewall-cmd –zone=public –add-port=3306/tcp –permanent<br> # firewall-cmd –reload</p>
+</blockquote>
+</li>
+<li><p>更改mysql语言</p>
+<blockquote>
+<p> 首先重新登录mysql,然后输入status,可以看到Server characterset: latinl，不是utf-8;<br> 出mysql, vi /etc/my.cnf新增下面代码<br> character-set-server=utf8<br> collation-server=utf8_general_ci<br> 保存成功后，重启mysql,然后输入status就会发现变化了</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="3-安装Nacos"><a href="#3-安装Nacos" class="headerlink" title="3. 安装Nacos"></a>3. 安装Nacos</h2><h3 id="（1）准备3台服务器作nacos集群"><a href="#（1）准备3台服务器作nacos集群" class="headerlink" title="（1）准备3台服务器作nacos集群"></a>（1）准备3台服务器作nacos集群</h3><blockquote>
+<p>配置hosts<br># vi /etc/hosts<br>配置本机的hostname到ip地址的映射</p>
+</blockquote>
+<h3 id="（2）安装JDK"><a href="#（2）安装JDK" class="headerlink" title="（2）安装JDK"></a>（2）安装JDK</h3><blockquote>
+<p>到ORACLE官网下载linux版本的jdk:<a href="https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html">https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html</a><br>上传jdk到三台服务器上，然后安装  # rpm -ivh jdk-8u131-linux-x64.rpm<br>配置jdk相关环境变量 # vi /etc/bashrc<br>export JAVA_HOME=/usr/java/jdk1.8.0_131<br>export PATH=$PATH:$JAVA_HOME/bin<br>source /etc/bashrc<br>测试jdc安装是否成功：java -version</p>
+</blockquote>
+<h3 id="（3）下载nacos-server-1-4版本的源码"><a href="#（3）下载nacos-server-1-4版本的源码" class="headerlink" title="（3）下载nacos-server-1.4版本的源码"></a>（3）下载nacos-server-1.4版本的源码</h3><pre><code># git clone https://github.com/alibaba/nacos.git
+# cd nacos
+# mvn -Prelease-nacos -Dmaven.test.skip=true clean install -U
+# ls -al distribution/target/ 可以看到nacos-server-1.4.0-SNAPSHOT.tar.gz压缩包  </code></pre>
+<h3 id="（4）-nacos上传到服务器上"><a href="#（4）-nacos上传到服务器上" class="headerlink" title="（4） nacos上传到服务器上"></a>（4） nacos上传到服务器上</h3><pre><code>win命令可以用 scp nacos-server-1.4.0-SNAPSHOT.tar.gz root@192.168.xxx.xxx:/usr/local/xxx 上传到三台服务器上</code></pre>
+<h3 id="（5）配置nacos"><a href="#（5）配置nacos" class="headerlink" title="（5）配置nacos"></a>（5）配置nacos</h3><ul>
+<li>解压nacos  <ul>
+<li>进入到nacos/conf目录下，重命名 cluster.conf.example, 去掉 example: mv cluster.conf.example cluster.conf, 然后编辑cluster.conf文件，配置三台机器的地址和端口号，默认端口号是8848  </li>
+<li>配置数据库    <blockquote>
+<p>修改application.properties文件里面数据库配置<br>spring.datasource.platform=mysql<br>db.num=1<br>db.url.0=xx, 替换成mysql数据库端口号及数据库<br>db.user=xx<br>db.password=xx</p>
+</blockquote>
+</li>
+<li>打开8848端口<blockquote>
+<p>开启防火墙  # systemctl start firewalld<br>开放指定端口  # firewall-cmd –zone=public –add-port=8848/tcp –permanent<br>重启防火墙  # firewall-cmd –reload</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li>mysql导入nacos相关数据库表  <ul>
+<li>在下载的nacos源码里nacos\distribution\conf下有nacos-mysql.sql文件 </li>
+</ul>
+</li>
+<li>启动<ul>
+<li>分别进行三台机器的bin目录下，执行startup.sh，检查logs目录下的start.out启动日志</li>
+<li>启动时如果startup.sh无法启动，可能是因为文件格式不对，需要修改文件格式  <blockquote>
+<p> # vi startup.sh<br> :set fileformat=unix<br> :wq</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li>访问nacos  <ul>
+<li>在浏览器地址栏输入nacos集群中的一个ip地址，192.168.xxx.xxx:8848/nacos/index.html即可跳转到nacos登录页面，默认用户名和密码都是nacos，登录成功后可看到nacos相关信息。</li>
+</ul>
+</li>
+</ul>
+<h2 id="4-问题"><a href="#4-问题" class="headerlink" title="4. 问题"></a>4. 问题</h2><h3 id="（1）nacos启动时nacos-log中报xxxIP未加入到集群list中的异常"><a href="#（1）nacos启动时nacos-log中报xxxIP未加入到集群list中的异常" class="headerlink" title="（1）nacos启动时nacos.log中报xxxIP未加入到集群list中的异常"></a>（1）nacos启动时nacos.log中报xxxIP未加入到集群list中的异常</h3><ul>
+<li>阿里云的实例有公有ip和私有ip，在nacos的cluster.conf配置文件中配置的是公有ip,但在启动时，nacos会将本机的私有ip自动加入到cluster.conf文件中，导致启动时报xxxIP未加入到集群list中的异常，虽然在页面上可以正常进入到nacos管理页面，但在做dubbo集成时，dubbo的服务调用方会注册不成功。</li>
+<li>目前的解决办法<blockquote>
+<p>修改nacos的启动文件，添加本地ip地址配置<br># vi startup.sh<br>找到 JVM Configuration 这部分, 在集群参数里增加 -Dnacos.server.ip=xx<br>JAVA_OPT=”${JAVA_OPT} -Dnacos.server.ip=xx.xx.xx.xx”</p>
+</blockquote>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>SpringCloud</category>
+        <category>nacos</category>
+      </categories>
+  </entry>
+  <entry>
     <title>Dubbo集成Nacos</title>
     <url>/2020/09/13/202009132040/</url>
     <content><![CDATA[<h3 id="deom框架"><a href="#deom框架" class="headerlink" title="deom框架"></a>deom框架</h3><blockquote>
@@ -251,137 +382,6 @@ public class Application &#123;
         <category>SpringCloud</category>
         <category>dubbo</category>
       </categories>
-  </entry>
-  <entry>
-    <title>阿里云nacos集群部署</title>
-    <url>/2020/08/29/aliyun-nacos/</url>
-    <content><![CDATA[<h2 id="1-准备4台linux服务器"><a href="#1-准备4台linux服务器" class="headerlink" title="1. 准备4台linux服务器"></a>1. 准备4台linux服务器</h2><ul>
-<li>准备阿里云服务器4台，3台用做nacos集群，1台用做mysql数据库</li>
-<li>配置阿里云服务器网络安全组，打开入网端口（8848）</li>
-</ul>
-<h2 id="2-安装mysql"><a href="#2-安装mysql" class="headerlink" title="2. 安装mysql"></a>2. 安装mysql</h2><h3 id="（1）下载并安装MySQL官方的Yum-Repository-Mysql版本-5-7-14"><a href="#（1）下载并安装MySQL官方的Yum-Repository-Mysql版本-5-7-14" class="headerlink" title="（1）下载并安装MySQL官方的Yum Repository, Mysql版本 5.7.14"></a>（1）下载并安装MySQL官方的Yum Repository, Mysql版本 5.7.14</h3><pre><code># wget -i -c https://dev.mysql.com/get/mysql57-community-release-el7-10.noarch.rpm
-# yum -y install mysql57-community-release-el7-10.noarch.rpm</code></pre>
-<h3 id="（2）安装MySQL-服务器"><a href="#（2）安装MySQL-服务器" class="headerlink" title="（2）安装MySQL 服务器"></a>（2）安装MySQL 服务器</h3><pre><code># yum -y install mysql-community-server</code></pre>
-<h3 id="（3）MySQL数据库设置"><a href="#（3）MySQL数据库设置" class="headerlink" title="（3）MySQL数据库设置"></a>（3）MySQL数据库设置</h3><ul>
-<li><p>首先启动MySQL  </p>
-<blockquote>
-<p> # systemctl start mysqld.service</p>
-</blockquote>
-</li>
-<li><p>查看MySQL运行状态</p>
-<blockquote>
-<p> # systemctl status mysqld.service</p>
-</blockquote>
-</li>
-<li><p>找root用户密码</p>
-<blockquote>
-<p> # grep “password” /var/log/mysqld.log</p>
-</blockquote>
-</li>
-<li><p>进入数据库</p>
-<blockquote>
-<p> # mysql -uroot -p</p>
-</blockquote>
-</li>
-<li><p>修改数据库密码</p>
-<blockquote>
-<p>mysql&gt; SET PASSWORD = PASSWORD(‘12345678’);<br>mysql&gt; ALTER USER ‘root’@’localhost’ PASSWORD EXPIRE NEVER;<br>mysql&gt; FLUSH PRIVILEGES;  </p>
-</blockquote>
-</li>
-<li><p>如果提示密码不符合策略，做如下操作再设置密码  </p>
-<blockquote>
-<p>mysql&gt; set global validate_password_policy=0;<br>mysql&gt; set global validate_password_length=1;</p>
-</blockquote>
-</li>
-<li><p>重新登录数据库，设置远程连接</p>
-<blockquote>
-<p>mysql&gt; use mysql;<br>mysql&gt; update user set host = ‘%’ where user = ‘root’;<br>mysql&gt; FLUSH PRIVILEGES;</p>
-</blockquote>
-</li>
-<li><p>进行远程连接测试</p>
-<blockquote>
-<p>本地进行连接测试</p>
-</blockquote>
-</li>
-<li><p>为firewalld添加开放端口</p>
-<blockquote>
-<p>添加mysql端口3306<br> # systemctl start firewalld<br> # firewall-cmd –zone=public –add-port=3306/tcp –permanent<br> # firewall-cmd –reload</p>
-</blockquote>
-</li>
-<li><p>更改mysql语言</p>
-<blockquote>
-<p> 首先重新登录mysql,然后输入status,可以看到Server characterset: latinl，不是utf-8;<br> 出mysql, vi /etc/my.cnf新增下面代码<br> character-set-server=utf8<br> collation-server=utf8_general_ci<br> 保存成功后，重启mysql,然后输入status就会发现变化了</p>
-</blockquote>
-</li>
-</ul>
-<h2 id="3-安装Nacos"><a href="#3-安装Nacos" class="headerlink" title="3. 安装Nacos"></a>3. 安装Nacos</h2><h3 id="（1）准备3台服务器作nacos集群"><a href="#（1）准备3台服务器作nacos集群" class="headerlink" title="（1）准备3台服务器作nacos集群"></a>（1）准备3台服务器作nacos集群</h3><blockquote>
-<p>配置hosts<br># vi /etc/hosts<br>配置本机的hostname到ip地址的映射</p>
-</blockquote>
-<h3 id="（2）安装JDK"><a href="#（2）安装JDK" class="headerlink" title="（2）安装JDK"></a>（2）安装JDK</h3><blockquote>
-<p>到ORACLE官网下载linux版本的jdk:<a href="https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html">https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html</a><br>上传jdk到三台服务器上，然后安装  # rpm -ivh jdk-8u131-linux-x64.rpm<br>配置jdk相关环境变量 # vi /etc/bashrc<br>export JAVA_HOME=/usr/java/jdk1.8.0_131<br>export PATH=$PATH:$JAVA_HOME/bin<br>source /etc/bashrc<br>测试jdc安装是否成功：java -version</p>
-</blockquote>
-<h3 id="（3）下载nacos-server-1-4版本的源码"><a href="#（3）下载nacos-server-1-4版本的源码" class="headerlink" title="（3）下载nacos-server-1.4版本的源码"></a>（3）下载nacos-server-1.4版本的源码</h3><pre><code># git clone https://github.com/alibaba/nacos.git
-# cd nacos
-# mvn -Prelease-nacos -Dmaven.test.skip=true clean install -U
-# ls -al distribution/target/ 可以看到nacos-server-1.4.0-SNAPSHOT.tar.gz压缩包  </code></pre>
-<h3 id="（4）-nacos上传到服务器上"><a href="#（4）-nacos上传到服务器上" class="headerlink" title="（4） nacos上传到服务器上"></a>（4） nacos上传到服务器上</h3><pre><code>win命令可以用 scp nacos-server-1.4.0-SNAPSHOT.tar.gz root@192.168.xxx.xxx:/usr/local/xxx 上传到三台服务器上</code></pre>
-<h3 id="（5）配置nacos"><a href="#（5）配置nacos" class="headerlink" title="（5）配置nacos"></a>（5）配置nacos</h3><ul>
-<li>解压nacos  <ul>
-<li>进入到nacos/conf目录下，重命名 cluster.conf.example, 去掉 example: mv cluster.conf.example cluster.conf, 然后编辑cluster.conf文件，配置三台机器的地址和端口号，默认端口号是8848  </li>
-<li>配置数据库    <blockquote>
-<p>修改application.properties文件里面数据库配置<br>spring.datasource.platform=mysql<br>db.num=1<br>db.url.0=xx, 替换成mysql数据库端口号及数据库<br>db.user=xx<br>db.password=xx</p>
-</blockquote>
-</li>
-<li>打开8848端口<blockquote>
-<p>开启防火墙  # systemctl start firewalld<br>开放指定端口  # firewall-cmd –zone=public –add-port=8848/tcp –permanent<br>重启防火墙  # firewall-cmd –reload</p>
-</blockquote>
-</li>
-</ul>
-</li>
-<li>mysql导入nacos相关数据库表  <ul>
-<li>在下载的nacos源码里nacos\distribution\conf下有nacos-mysql.sql文件 </li>
-</ul>
-</li>
-<li>启动<ul>
-<li>分别进行三台机器的bin目录下，执行startup.sh，检查logs目录下的start.out启动日志</li>
-<li>启动时如果startup.sh无法启动，可能是因为文件格式不对，需要修改文件格式  <blockquote>
-<p> # vi startup.sh<br> :set fileformat=unix<br> :wq</p>
-</blockquote>
-</li>
-</ul>
-</li>
-<li>访问nacos  <ul>
-<li>在浏览器地址栏输入nacos集群中的一个ip地址，192.168.xxx.xxx:8848/nacos/index.html即可跳转到nacos登录页面，默认用户名和密码都是nacos，登录成功后可看到nacos相关信息。</li>
-</ul>
-</li>
-</ul>
-<h2 id="4-问题"><a href="#4-问题" class="headerlink" title="4. 问题"></a>4. 问题</h2><h3 id="（1）nacos启动时nacos-log中报xxxIP未加入到集群list中的异常"><a href="#（1）nacos启动时nacos-log中报xxxIP未加入到集群list中的异常" class="headerlink" title="（1）nacos启动时nacos.log中报xxxIP未加入到集群list中的异常"></a>（1）nacos启动时nacos.log中报xxxIP未加入到集群list中的异常</h3><ul>
-<li>阿里云的实例有公有ip和私有ip，在nacos的cluster.conf配置文件中配置的是公有ip,但在启动时，nacos会将本机的私有ip自动加入到cluster.conf文件中，导致启动时报xxxIP未加入到集群list中的异常，虽然在页面上可以正常进入到nacos管理页面，但在做dubbo集成时，dubbo的服务调用方会注册不成功。</li>
-<li>目前的解决办法<blockquote>
-<p>修改nacos的启动文件，添加本地ip地址配置<br># vi startup.sh<br>找到 JVM Configuration 这部分, 在集群参数里增加 -Dnacos.server.ip=xx<br>JAVA_OPT=”${JAVA_OPT} -Dnacos.server.ip=xx.xx.xx.xx”</p>
-</blockquote>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>SpringCloud</category>
-        <category>nacos</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>转正小记</title>
-    <url>/2020/10/10/202010102013/</url>
-    <content><![CDATA[<p>&emsp;&emsp;距离4月7号入职已过半年，今天终于要转正了，虽然现在比较佛系，但还是开心一下，毕竟转正后每月工资又多了些，现在就这点儿出息了，哈哈。</p>
-<p>&emsp;&emsp;今天下午，生平第一次当着十几个人的面演讲ppt，足足讲了40分钟，真是紧张的要死，全程只顾着讲自己的，完全没有节奏，就像小学生背课文一样，哗啦啦一下将准备的东西都倒出来，也管不上听众的感受，自己也是身不由己，从没锻炼过，还有公众讲话恐惧症，不颤音不断片已经够好的了，以后还是要多多锻炼。</p>
-<p>&emsp;&emsp;今晚可以睡个好觉了，这两天快被这个转正演讲折磨死了，从开始写ppt就一直处于紧张状态，跟打仗备战似的，时不时的进行演练一遍，昨晚重新改ppt加内容再过一遍弄到了1点，躺床上还是翻来覆去睡不着的在想着哪个点要怎样讲，好不容易睡着了梦里还是在和ppt拧巴，早上6点多醒了满脑子都是演讲的内容，脑子里再过一遍，公交地铁上书也没心看，一直在脑海里演练演讲的内容，上班后工作也不在状态也还在一直想着下午要怎么讲，中午吃饭和小伙伴说话都紧张的话都说不利索，吃完饭回来午睡又担心的睡不着手心开始冒汗，下午努力投入到工作中转移注意力，终于在5点开场进行了演讲，第一次第一次，激动、紧张，虽然全都是平时一起工作的同事，大家都很熟悉了，但心理就是这样不设防的塌陷，讲完之后如释重负，没有感动的想哭，只是想手舞足蹈，听着小伙伴们的评论，都是一个劲的夸赞，突然感觉很幸福，觉得自己在这个团队中能将自己的心理问题给治愈，能完善自己的人格缺陷，真真是太好了。最后还是丁总看的透澈，就是自己经历的太少了，踩的坑太少了，而又太脸皮子太薄，以后要多跳坑，有坑就跳，扛过了这波，剩下的就都不是事了。</p>
-<p>&emsp;&emsp;生活总要有点仪式感，相信今天过后，自己可以朝着自己的展望脚踏实地的奋斗~</p>
-]]></content>
-      <categories>
-        <category>随笔</category>
-      </categories>
-      <tags>
-        <tag>生活</tag>
-      </tags>
   </entry>
   <entry>
     <title>Ubuntu/优麒麟安装deepin-wine微信的方法</title>

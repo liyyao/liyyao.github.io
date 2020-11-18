@@ -188,6 +188,140 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.liyyao.com/2020/11/18/202011182114/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="liyyao">
+      <meta itemprop="description" content="less is more">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只特立独行的猫">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/18/202011182114/" class="post-title-link" itemprop="url">数据库事务</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-18 21:14:59 / 修改时间：22:25:13" itemprop="dateCreated datePublished" datetime="2020-11-18T21:14:59+08:00">2020-11-18</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+	
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="一、数据库事务的4个特性（ACID）"><a href="#一、数据库事务的4个特性（ACID）" class="headerlink" title="一、数据库事务的4个特性（ACID）"></a>一、数据库事务的4个特性（ACID）</h3><ul>
+<li><p>原子性（Atomic）<br>  表示组成一个事务的多个数据库操作是一个不可分割的原子单元，只有所有的操作执行成功，整个事务才提交。事务中的任务一个数据库操作失败，已经执行的任何操作都必须撤销，让数据库返回到初始状态。</p>
+</li>
+<li><p>一致性（Consistency）<br>  事务操作成功后，数据所处的状态和它的业务规则是一致的，即数据不会被破坏。如从A账户转账100元到B账户，不管操作成功与否，A账户和B账户的存款总额是不变的。</p>
+</li>
+<li><p>隔离性（Isolation）<br>  在并发数据操作时，不同的事务拥有各自的数据空间，它们的操作不会对对方产生干扰。准备说，并非要求做到完全无干扰。数据库规定了多种事务隔离级别，不同的隔离级别对应不同的干扰程序，隔离级别越高，数据一致性越好，但并发性越弱。</p>
+</li>
+<li><p>持久性（Durabiliy）<br>  一旦事务提交成功后，事务中所有的数据操作都必须被持久化到数据库中。即使在提交事务后，数据库马上崩溃，在数据库重启时，也必须保证能够通过某种机制恢复数据。</p>
+</li>
+</ul>
+<h3 id="二、事务的并发问题"><a href="#二、事务的并发问题" class="headerlink" title="二、事务的并发问题"></a>二、事务的并发问题</h3><ul>
+<li><p>脏读<br>  A事务读取了B事务尚未提交的更改数据，B事务可能发生回滚，这时A事务读到的数据根本不存在，发生了脏读。  </p>
+<table>
+<thead>
+<tr>
+<th align="left">时间</th>
+<th align="left">转账事务A</th>
+<th align="left">转账事务B</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">T1</td>
+<td align="left"></td>
+<td align="left">开始事务</td>
+</tr>
+<tr>
+<td align="left">T2</td>
+<td align="left">开始事务</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T3</td>
+<td align="left"></td>
+<td align="left">查询账户余额为1000元</td>
+</tr>
+<tr>
+<td align="left">T4</td>
+<td align="left"></td>
+<td align="left">取出500元，把余额改为500元</td>
+</tr>
+<tr>
+<td align="left">T5</td>
+<td align="left">查询账户余额为500元</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T6</td>
+<td align="left"></td>
+<td align="left">撤销事务，余额恢复为1000元</td>
+</tr>
+<tr>
+<td align="left">T7</td>
+<td align="left">汇入100元，把余额改为600元</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">T8</td>
+<td align="left">提交事务</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+</li>
+<li><p>不可重复读<br>  A事务读取了B事务已经提交的更改数据。  </p>
+</li>
+<li><p>幻象读<br>  A事务读取B事务提交的新增数据，这时A事务将出现幻象读。  </p>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+	
+	<div>
+		
+	</div>
+	
+		<div>
+			  
+		</div>
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://www.liyyao.com/2020/10/18/202010181635/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1209,7 +1343,7 @@ public class Application &#123;
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-count">8</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1220,7 +1354,7 @@ public class Application &#123;
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">标签</span>
       </div>
   </nav>
@@ -1263,7 +1397,7 @@ public class Application &#123;
 
 <div class="theme-info">
   <div class="powered-by"></div>
-  <span class="post-count">博客全站共6.9k字</span>
+  <span class="post-count">博客全站共7.4k字</span>
 </div>
 <!--
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动

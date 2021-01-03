@@ -317,62 +317,65 @@ public class Application &#123;
 </li>
 </ul>
 <h3 id="二、事务的并发问题"><a href="#二、事务的并发问题" class="headerlink" title="二、事务的并发问题"></a>二、事务的并发问题</h3><ul>
-<li><p>脏读<br>  A事务读取了B事务尚未提交的更改数据，B事务可能发生回滚，这时A事务读到的数据根本不存在，发生了脏读。  </p>
+<li><p><strong>脏读</strong><br>  A事务读取了B事务尚未提交的更改数据，B事务可能发生回滚，这时A事务读到的数据根本不存在，发生了脏读。   </p>
+</li>
+<li><p><strong>不可重复读</strong><br>  A事务读取了B事务已经提交的更改数据。  </p>
+</li>
+<li><p><strong>幻象读</strong><br>  A事务读取B事务提交的新增数据，这时A事务将出现幻象读。  幻象读一般发生在计算统计数据的事务中。</p>
+</li>
+<li><p><strong>第一类丢失更新</strong><br>  A事务撤销时，把已经提交的B事务的更新数据覆盖了。</p>
+</li>
+<li><p><strong>第二类丢失更新</strong><br>  A事务覆盖B事务已经提交的数据，造成B事务所做操作丢失。</p>
+</li>
+</ul>
+<p><strong>注：</strong>幻象读和不可重复读是两个容易混淆的概念，前者是指读到了其他已经提交事务的新增数据，而后者是指读到了已经提交事务的更改数据（更改或删除）。为了避免这两种情况，采取的对策是不同的：防止读到更改数据，只需对操作的数据添加行级锁，阻止操作中的数据发生变化；而防止读到新增数据，则往往需要添加表级锁，即将整张表锁定，防止新增数据。  </p>
+<h3 id="三、数据库锁机制"><a href="#三、数据库锁机制" class="headerlink" title="三、数据库锁机制"></a>三、数据库锁机制</h3><p>&emsp;&emsp;数据并发会引发很多问题，在一些场合下有些问题是允许的，但在另一些场合下可能是致命的。数据库通过锁机制解决并发访问的问题。按锁定的对象不同，一般可以分为<strong>表锁定</strong>和<strong>行锁定</strong>。前者对整张表进行锁定，后者对表中的特定行进行锁定。从并发事务锁定的关系上看，可以分为<strong>共享锁定</strong>和<strong>独占锁定</strong>。共享锁定会防止独占锁定，但允许其他的共享锁定；而独占锁定既防止其他的独占锁定，也防止其他的共享锁定。</p>
+<h3 id="四、事务隔离级别"><a href="#四、事务隔离级别" class="headerlink" title="四、事务隔离级别"></a>四、事务隔离级别</h3><p>&emsp;&emsp;尽管数据库为用户提供了锁的DML操作方式，但直接使用锁管理是非常麻烦的，因为数据库为用户提供了自动锁机制。只要用户指定会话的事务隔离级别，数据库就会分析事务中的SQL语句，然后自动为事务操作的数据资源添加适合的锁。此外，数据库还会维护这些锁，当一个资源上的锁数目太多时，自动进行锁升级以提高系统的运行性能，这对用户来说是透明的。</p>
+<p>&emsp;&emsp;ANSI/ISO SQL92标准定义了4个等级的事务隔离级别，在相同的数据环境下，使用相同的输入，执行相同的工作，根据不同的隔离级别，可能导致不同的结果。不同事务隔离级别能够解决的数据并发问题的能力是不同的。 </p>
 <table>
 <thead>
 <tr>
-<th align="left">时间</th>
-<th align="left">转账事务A</th>
-<th align="left">转账事务B</th>
+<th align="center">隔离级别</th>
+<th align="center">脏读</th>
+<th align="center">不可重复读</th>
+<th align="center">幻象读</th>
+<th align="center">第一类丢失更新</th>
+<th align="center">第二类丢失更新</th>
 </tr>
 </thead>
 <tbody><tr>
-<td align="left">T1</td>
-<td align="left"></td>
-<td align="left">开始事务</td>
+<td align="center">READ UNCOMMITED</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">1</td>
 </tr>
 <tr>
-<td align="left">T2</td>
-<td align="left">开始事务</td>
-<td align="left"></td>
+<td align="center">READ COMITED</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">1</td>
 </tr>
 <tr>
-<td align="left">T3</td>
-<td align="left"></td>
-<td align="left">查询账户余额为1000元</td>
+<td align="center">REPEATABLE READ</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
 </tr>
 <tr>
-<td align="left">T4</td>
-<td align="left"></td>
-<td align="left">取出500元，把余额改为500元</td>
-</tr>
-<tr>
-<td align="left">T5</td>
-<td align="left">查询账户余额为500元</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">T6</td>
-<td align="left"></td>
-<td align="left">撤销事务，余额恢复为1000元</td>
-</tr>
-<tr>
-<td align="left">T7</td>
-<td align="left">汇入100元，把余额改为600元</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">T8</td>
-<td align="left">提交事务</td>
-<td align="left"></td>
+<td align="center">SERIALIZABLE</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
 </tr>
 </tbody></table>
-</li>
-<li><p>不可重复读<br>  A事务读取了B事务已经提交的更改数据。  </p>
-</li>
-<li><p>幻象读<br>  A事务读取B事务提交的新增数据，这时A事务将出现幻象读。  </p>
-</li>
-</ul>
 ]]></content>
       <tags>
         <tag>database</tag>
@@ -534,6 +537,16 @@ public class Application &#123;
       <categories>
         <category>技巧</category>
         <category>系统</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>地下室手记</title>
+    <url>/2020/12/06/202012062053/</url>
+    <content><![CDATA[<p>第一次读陀思妥耶夫斯基，选的第一本是《地下室手记》，很小很薄的一本书，想做为读陀氏的入门。读完后，觉得甚是过瘾，以下简单写写读后感想。</p>
+<p>主人公是一个年四十岁的公务员，得到远房亲戚遗留下的一笔遗产时，立刻辞职，蛰居在自己的小角落里。然后以地下室人的身份，以第一人称进行了一系列自身的剖析、诉说、与斗争，大段大段的内心独白，将自己思想的矛盾与精分展现的淋漓尽致。在看书的过程中，时刻看到自己的影子，随时跟着主人公一起精分，歇斯底里的咆哮、狂怒，然后又归于平静。</p>
+]]></content>
+      <categories>
+        <category>读书笔记</category>
       </categories>
   </entry>
 </search>

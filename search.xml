@@ -634,4 +634,22 @@ $ hexo clean
         <tag>生活</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Centos7 没有ifconfig命令解决办法</title>
+    <url>/202108222111.html</url>
+    <content><![CDATA[<p>ifconfig命令用来查看ip信息，Linux最小化安装是没有ifconfig的，以下演示如果安装ifconfig。</p>
+<h5 id="1-输入ifconfig提示不存在"><a href="#1-输入ifconfig提示不存在" class="headerlink" title="1.输入ifconfig提示不存在"></a><strong>1.输入ifconfig提示不存在</strong></h5><p><img src="/202108222111/2021082201.png" alt="-bash: ifconfig: command not found">  </p>
+<h5 id="2-先确认是否因为环境变量没有ifconfig导致的"><a href="#2-先确认是否因为环境变量没有ifconfig导致的" class="headerlink" title="2.先确认是否因为环境变量没有ifconfig导致的"></a>2.先确认是否因为环境变量没有ifconfig导致的</h5><p><img src="/202108222111/2021082202.png" alt="环境变量"><br>  表示系统没有安装ifconfig</p>
+<h5 id="3-安装ifconfig"><a href="#3-安装ifconfig" class="headerlink" title="3.安装ifconfig"></a><strong>3.安装ifconfig</strong></h5><pre><code># yum install ifconfig  </code></pre>
+<p><img src="/202108222111/2021082203.png" alt="安装ifconfig"> </p>
+<h5 id="4-提示没有ifconfig安装包。再使用yum-search-ifconfig来搜索下ifconfig的相关"><a href="#4-提示没有ifconfig安装包。再使用yum-search-ifconfig来搜索下ifconfig的相关" class="headerlink" title="4.提示没有ifconfig安装包。再使用yum search ifconfig来搜索下ifconfig的相关"></a><strong>4.提示没有ifconfig安装包。再使用yum search ifconfig来搜索下ifconfig的相关</strong></h5><pre><code># yum search ifconfig  </code></pre>
+<p><img src="/202108222111/2021082204.png" alt="查看ifconfig相关"> </p>
+<h5 id="5-查看ifconfig匹配的是net-tools-x86-64包，安装net-tools-x86-64包"><a href="#5-查看ifconfig匹配的是net-tools-x86-64包，安装net-tools-x86-64包" class="headerlink" title="5.查看ifconfig匹配的是net-tools.x86_64包，安装net-tools.x86_64包"></a><strong>5.查看ifconfig匹配的是net-tools.x86_64包，安装net-tools.x86_64包</strong></h5><pre><code># yum install net-tools.x86_64 -y  </code></pre>
+<p><img src="/202108222111/2021082205.png" alt="安装net-tools.x86_64"> </p>
+<h5 id="6-输入ifconfig查看效果"><a href="#6-输入ifconfig查看效果" class="headerlink" title="6.输入ifconfig查看效果"></a><strong>6.输入ifconfig查看效果</strong></h5><pre><code># ifconfig</code></pre>
+<p><img src="/202108222111/2021082206.png" alt="查看ip"> </p>
+<h5 id="7-输入ip-addr也可以查询"><a href="#7-输入ip-addr也可以查询" class="headerlink" title="7.输入ip addr也可以查询"></a><strong>7.输入ip addr也可以查询</strong></h5><pre><code># ip addr</code></pre>
+<p><img src="/202108222111/2021082207.png" alt="查看ip"> </p>
+]]></content>
+  </entry>
 </search>

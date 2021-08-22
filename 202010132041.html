@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.liyyao.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="&amp;emsp;&amp;emsp;但凡项目发布，都要考虑两个问题，一个是验证，一个是回滚。 &amp;emsp;&amp;emsp;验证就是说，你怎么确定你这次部署成功了？一般来说，要观察每台机器启动后处理请求时的日志，日志是否正常，是否有报错，一般日志正常、没有报错，那么就算是启动成功了，有时候也会让QA&#x2F;PM做一个线上验证。 &amp;emsp;&amp;emsp;那么万一发布失败了呢？此时就得回滚，因为不同的上线是不一样的，有时候你">
+<meta property="og:type" content="article">
+<meta property="og:title" content="互联网公司部署方案">
+<meta property="og:url" content="http://www.liyyao.com/202010132041.html">
+<meta property="og:site_name" content="一只特立独行的猫">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;但凡项目发布，都要考虑两个问题，一个是验证，一个是回滚。 &amp;emsp;&amp;emsp;验证就是说，你怎么确定你这次部署成功了？一般来说，要观察每台机器启动后处理请求时的日志，日志是否正常，是否有报错，一般日志正常、没有报错，那么就算是启动成功了，有时候也会让QA&#x2F;PM做一个线上验证。 &amp;emsp;&amp;emsp;那么万一发布失败了呢？此时就得回滚，因为不同的上线是不一样的，有时候你">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-10-13T12:41:10.000Z">
+<meta property="article:modified_time" content="2021-08-22T09:12:22.552Z">
+<meta property="article:author" content="liyyao">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://www.liyyao.com/202010132041.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>互联网公司部署方案 | 一只特立独行的猫</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一只特立独行的猫</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">hello world</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://www.liyyao.com/202010132041.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="liyyao">
+      <meta itemprop="description" content="less is more">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一只特立独行的猫">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          互联网公司部署方案
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-13 20:41:10" itemprop="dateCreated datePublished" datetime="2020-10-13T20:41:10+08:00">2020-10-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-08-22 17:12:22" itemprop="dateModified" datetime="2021-08-22T17:12:22+08:00">2021-08-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SpringCloud/" itemprop="url" rel="index"><span itemprop="name">SpringCloud</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SpringCloud/%E6%8A%80%E5%B7%A7/" itemprop="url" rel="index"><span itemprop="name">技巧</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+	
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>&emsp;&emsp;但凡项目发布，都要考虑两个问题，一个是<strong>验证</strong>，一个是<strong>回滚</strong>。</p>
+<p>&emsp;&emsp;<strong>验证</strong>就是说，你怎么确定你这次部署成功了？一般来说，要观察每台机器启动后处理请求时的日志，日志是否正常，是否有报错，一般日志正常、没有报错，那么就算是启动成功了，有时候也会让QA/PM做一个线上验证。</p>
+<p>&emsp;&emsp;那么万一发布失败了呢？此时就得<strong>回滚</strong>，因为不同的上线是不一样的，有时候你仅仅是对代码做一些微调，大多数时候是针对新需求有上线，加了新的代码/接口，有时候是架构重构，实现机制和技术架构都变了，所以回滚可能也不太一样，比如，如果你是加了一些新的接口，结果上线失败了，此时新接口没人访问，直接代码回滚到旧版本重新部署就行了；如果你是做技术架构升级，此时失败了，可能很多请求已经处理失败，数据丢失，严重的时候会导致公司丢失订单，或者是数据写入了但是都错了，此时可能会采用回滚代码，或者清洗错乱数据的方式来回滚，总之，针对你的发布，你要考虑到失败之后的回滚方案，回滚代码，就得用旧版本的代码，然后重新在各个机器上依次部署，就算是一次回滚了，至于丢失了数据没有，要不要清洗数据，这个看情况来定。</p>
+<h3 id="（1）滚动发布"><a href="#（1）滚动发布" class="headerlink" title="（1）滚动发布"></a>（1）滚动发布</h3><p>&emsp;&emsp;这是最常见的部署模式，一般就是说一个服务/系统都会部署在多台服务器上，部署的时候手动依次进行部署。比如每台服务器上放一个tomcat，每台机器依次停机tomcat，然后把新的代码放进去，再重新启动tomcat，各个服务器都这样做，这就是一种滚动发布。</p>
+<p>&emsp;&emsp;中小型公司都会做自动化部署，自动化部署用的比较多的就是jenkins，因为jenkins是支持持续集成和持续交付的，简单来说就是你每天都提交代码，他每天都自动跑测试确保代码集成没问题，然后可能隔几天就把一个生产可用的小版本交付到线上。jenkins可以自动在多台机器上部署你的服务/系统，过程其实也是类似的，只不过把手动改成自动罢了。</p>
+<p>&emsp;&emsp;中大型公司，一般发布系统都是自己研发的，你在上面指定一个服务，指定一个git仓库的代码分支，然后指定一个环境，指定一批机器，发布系统自动到git仓库拉取代码到本地，编译打包，然后在你指定环境的机器上，依次停止当前运行的进程，然后依次重启你新代码的服务进行。</p>
+<p>&emsp;&emsp;以上这些都是典型的滚动发布。滚动发布的话，风险还是比较大的，因为一旦你用了自动化的滚动发布，那么发布系统会自动把你的所有机器都部署新版本的代码，这个时候中间很有可能会出现问题，导致大规模的异常和损失，所以现在一般中大型公司，都不会贸然用滚动发布模式。</p>
+<h3 id="（2）灰度发布"><a href="#（2）灰度发布" class="headerlink" title="（2）灰度发布"></a>（2）灰度发布</h3><p>&emsp;&emsp;灰度发布就是说，不要上线就滚动全部发布到所有机器，一般就是会部署在比如1台机器上，采用新版本，然后切比如10%的流量过去，观察那10%的流量在1台机器上运行一段时间，比如运行几天时间，观察日志、异常、数据是否一切正常，如果验证发现全部都正常，那么此时就可以全量发布了，全量发布的时候就是采用滚动发布那种模式。</p>
+<p>&emsp;&emsp;这个好处就是说，你先用10%以内的小流量放到灰度新版本的那台服务器上验证一段时间，感觉没问题了，才会全量部署，这么操作，即使有问题，也就10%以内的请求出现问题，损失不会太大，如果你公司体量特别大，灰度也可以是1%，甚至0.1%的流量。</p>
+<p>&emsp;&emsp;如果灰度的时候有问题，那么立刻把10%以内的小流量切过去请求老版本代码部署的机器，灰度版本的机器立马就没有流量请求了，这个回滚速度是极快的。</p>
+<p>&emsp;&emsp;通常灰度验证过后，全量发布都不会有太大的问题，基本上再出问题概率就很小了，所以现在中大型互联网公司一般都是灰度发布模式。</p>
+<h3 id="（3）蓝绿部署"><a href="#（3）蓝绿部署" class="headerlink" title="（3）蓝绿部署"></a>（3）蓝绿部署</h3><p>&emsp;&emsp;蓝绿部署就是说，你得同时准备两个集群，一个集群放新版本代码，一个集群放老版本代码，然后新版本代码的集群准备好了过后，直接线上流量切到新版本集群上，跑一段时间来验证，如果发现有问题，回滚就是立马把流量切回老版本集群，回滚是很快速的。如果新版本集群运行一段时间感觉没问题了，此时就可以把老版本集群给下线了。</p>
+<p>&emsp;&emsp;<strong>那么为什么有灰度发布了还要用蓝绿部署呢？</strong><br>&emsp;&emsp;灰度发布过后，还是要全量部署的，但是有时候，如果涉及到一些新的架构方案，或者是新的接口，10%以内的小流量可能没有办法暴露出线上的高并发问题，所以灰度验证没问题，结果全量部署还是有小概率会失败，此时全量发布用滚动发布的方式，逐步部署过去，很快会引发大规模的失败，此时回滚是很慢的，因为要一台一台逐步回滚。所以说，一般针对那种改动不太大的小版本，比如加一个接口，修改一些代码，修复几个bug，类似这种整体变动不太大的情况，建议使用灰度发布，因为这种一般灰度验证没问题，全量部署也不会有问题。但是如果涉及到那种很大规模的架构重构或者架构升级，比如数据存储架构升级，或者是技术架构整体改造，或者是代码大规模重构，类似这种场景，最好是用蓝绿部署，也就是说，完全部署一个新的集群，然后把较大的流量切过去，比如先切10%，再切50%，最后切到100%，让新集群承载100%的流量跑一段时间。过程中一旦有问题，立马流量全部切回老集群，这个回滚速度比灰度发布的全量部署回滚要快多了，因为仅仅是切流量而已，不需要重新部署。</p>
+
+    </div>
+
+    
+    
+    
+	
+	<div>
+		
+			<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+		
+	</div>
+	
+		<div>
+			  
+				
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+  
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script src="https://cdn.bootcss.com/jquery/2.0.0/jquery.min.js"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <p><span>本文标题:</span><a href="/202010132041.html">互联网公司部署方案</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问  的个人博客"></a></p>
+  <p><span>发布时间:</span>2020年10月13日 - 20:10</p>
+  <p><span>最后更新:</span>2021年08月22日 - 17:08</p>
+  <p><span>原始链接:</span><a href="/202010132041.html" title="互联网公司部署方案">http://www.liyyao.com/202010132041.html</a>
+    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="http://www.liyyao.com/202010132041.html"  aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
+</div>
+<script> 
+    var clipboard = new Clipboard('.fa-clipboard');
+	  $(".fa-clipboard").click(function(){
+      clipboard.on('success', function(){
+        swal({   
+          title: "",   
+          text: '复制成功',
+          icon: "success", 
+          showConfirmButton: true
+          });
+	});
+    });  
+</script>
+
+			  
+		</div>
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/202010102013.html" rel="prev" title="转正小记">
+      <i class="fa fa-chevron-left"></i> 转正小记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/202010181635.html" rel="next" title="闲言碎语">
+      闲言碎语 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%EF%BC%881%EF%BC%89%E6%BB%9A%E5%8A%A8%E5%8F%91%E5%B8%83"><span class="nav-number">1.</span> <span class="nav-text">（1）滚动发布</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%EF%BC%882%EF%BC%89%E7%81%B0%E5%BA%A6%E5%8F%91%E5%B8%83"><span class="nav-number">2.</span> <span class="nav-text">（2）灰度发布</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%EF%BC%883%EF%BC%89%E8%93%9D%E7%BB%BF%E9%83%A8%E7%BD%B2"><span class="nav-number">3.</span> <span class="nav-text">（3）蓝绿部署</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="liyyao"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">liyyao</p>
+  <div class="site-description" itemprop="description">less is more</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">liyyao</span>
+</div>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_uv"></span>
+</span>
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">博客全站共10k字</span>
+</div>
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+-->
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

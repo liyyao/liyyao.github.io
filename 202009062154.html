@@ -22,21 +22,19 @@
     var CONFIG = {"hostname":"www.liyyao.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="一、数据库事务的4个特性（ACID） 原子性（Atomic）  表示组成一个事务的多个数据库操作是一个不可分割的原子单元，只有所有的操作执行成功，整个事务才提交。事务中的任务一个数据库操作失败，已经执行的任何操作都必须撤销，让数据库返回到初始状态。  一致性（Consistency）  事务操作成功后，数据所处的状态和它的业务规则是一致的，即数据不会被破坏。如从A账户转账100元到B账户，不管操作">
+  <meta name="description" content="一、解决什么问题？ （1）数据量大（2）需要水平切分（3）一个schema上有多个字段的查询需求   举例：订单业务Order(oid, info_detail)T(buyer_id, seller_id, oid)数据量大了怎么办？一个表一个库是存不下的，这个时候往往需要进行水平切分。订单表很容易进行水平切分，根据订单id进行表切分，查询的时候可以根据订单id直接定位到它水平切分到哪个库或者哪个">
 <meta property="og:type" content="article">
-<meta property="og:title" content="数据库事务">
-<meta property="og:url" content="http://www.liyyao.com/2020/11/18/202011182114/index.html">
+<meta property="og:title" content="“反范式”数据库设计之数据冗余架构设计与细节">
+<meta property="og:url" content="http://www.liyyao.com/202009062154.html">
 <meta property="og:site_name" content="一只特立独行的猫">
-<meta property="og:description" content="一、数据库事务的4个特性（ACID） 原子性（Atomic）  表示组成一个事务的多个数据库操作是一个不可分割的原子单元，只有所有的操作执行成功，整个事务才提交。事务中的任务一个数据库操作失败，已经执行的任何操作都必须撤销，让数据库返回到初始状态。  一致性（Consistency）  事务操作成功后，数据所处的状态和它的业务规则是一致的，即数据不会被破坏。如从A账户转账100元到B账户，不管操作">
+<meta property="og:description" content="一、解决什么问题？ （1）数据量大（2）需要水平切分（3）一个schema上有多个字段的查询需求   举例：订单业务Order(oid, info_detail)T(buyer_id, seller_id, oid)数据量大了怎么办？一个表一个库是存不下的，这个时候往往需要进行水平切分。订单表很容易进行水平切分，根据订单id进行表切分，查询的时候可以根据订单id直接定位到它水平切分到哪个库或者哪个">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-11-18T13:14:59.000Z">
-<meta property="article:modified_time" content="2021-01-03T12:43:39.619Z">
+<meta property="article:published_time" content="2020-09-06T13:54:28.000Z">
+<meta property="article:modified_time" content="2021-08-22T09:10:59.210Z">
 <meta property="article:author" content="liyyao">
-<meta property="article:tag" content="database">
-<meta property="article:tag" content="tx">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://www.liyyao.com/2020/11/18/202011182114/">
+<link rel="canonical" href="http://www.liyyao.com/202009062154.html">
 
 
 <script id="page-configurations">
@@ -49,7 +47,7 @@
   };
 </script>
 
-  <title>数据库事务 | 一只特立独行的猫</title>
+  <title>“反范式”数据库设计之数据冗余架构设计与细节 | 一只特立独行的猫</title>
   
 
 
@@ -193,7 +191,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://www.liyyao.com/2020/11/18/202011182114/">
+    <link itemprop="mainEntityOfPage" href="http://www.liyyao.com/202009062154.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -206,7 +204,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          数据库事务
+          “反范式”数据库设计之数据冗余架构设计与细节
         </h1>
 
         <div class="post-meta">
@@ -216,15 +214,28 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2020-11-18 21:14:59" itemprop="dateCreated datePublished" datetime="2020-11-18T21:14:59+08:00">2020-11-18</time>
+              <time title="创建时间：2020-09-06 21:54:28" itemprop="dateCreated datePublished" datetime="2020-09-06T21:54:28+08:00">2020-09-06</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-01-03 20:43:39" itemprop="dateModified" datetime="2021-01-03T20:43:39+08:00">2021-01-03</time>
+                <time title="修改时间：2021-08-22 17:10:59" itemprop="dateModified" datetime="2021-08-22T17:10:59+08:00">2021-08-22</time>
               </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84%E5%B8%88%E8%AE%AD%E7%BB%83%E8%90%A5/" itemprop="url" rel="index"><span itemprop="name">架构师训练营</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84%E5%B8%88%E8%AE%AD%E7%BB%83%E8%90%A5/%E7%88%86%E5%8F%91%E6%9C%9F/" itemprop="url" rel="index"><span itemprop="name">爆发期</span></a>
+                </span>
+            </span>
 
           
 
@@ -238,76 +249,30 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="一、数据库事务的4个特性（ACID）"><a href="#一、数据库事务的4个特性（ACID）" class="headerlink" title="一、数据库事务的4个特性（ACID）"></a>一、数据库事务的4个特性（ACID）</h3><ul>
-<li><p>原子性（Atomic）<br>  表示组成一个事务的多个数据库操作是一个不可分割的原子单元，只有所有的操作执行成功，整个事务才提交。事务中的任务一个数据库操作失败，已经执行的任何操作都必须撤销，让数据库返回到初始状态。</p>
-</li>
-<li><p>一致性（Consistency）<br>  事务操作成功后，数据所处的状态和它的业务规则是一致的，即数据不会被破坏。如从A账户转账100元到B账户，不管操作成功与否，A账户和B账户的存款总额是不变的。</p>
-</li>
-<li><p>隔离性（Isolation）<br>  在并发数据操作时，不同的事务拥有各自的数据空间，它们的操作不会对对方产生干扰。准备说，并非要求做到完全无干扰。数据库规定了多种事务隔离级别，不同的隔离级别对应不同的干扰程序，隔离级别越高，数据一致性越好，但并发性越弱。</p>
-</li>
-<li><p>持久性（Durabiliy）<br>  一旦事务提交成功后，事务中所有的数据操作都必须被持久化到数据库中。即使在提交事务后，数据库马上崩溃，在数据库重启时，也必须保证能够通过某种机制恢复数据。</p>
-</li>
-</ul>
-<h3 id="二、事务的并发问题"><a href="#二、事务的并发问题" class="headerlink" title="二、事务的并发问题"></a>二、事务的并发问题</h3><ul>
-<li><p><strong>脏读</strong><br>  A事务读取了B事务尚未提交的更改数据，B事务可能发生回滚，这时A事务读到的数据根本不存在，发生了脏读。   </p>
-</li>
-<li><p><strong>不可重复读</strong><br>  A事务读取了B事务已经提交的更改数据。  </p>
-</li>
-<li><p><strong>幻象读</strong><br>  A事务读取B事务提交的新增数据，这时A事务将出现幻象读。  幻象读一般发生在计算统计数据的事务中。</p>
-</li>
-<li><p><strong>第一类丢失更新</strong><br>  A事务撤销时，把已经提交的B事务的更新数据覆盖了。</p>
-</li>
-<li><p><strong>第二类丢失更新</strong><br>  A事务覆盖B事务已经提交的数据，造成B事务所做操作丢失。</p>
-</li>
-</ul>
-<p><strong>注：</strong>幻象读和不可重复读是两个容易混淆的概念，前者是指读到了其他已经提交事务的新增数据，而后者是指读到了已经提交事务的更改数据（更改或删除）。为了避免这两种情况，采取的对策是不同的：防止读到更改数据，只需对操作的数据添加行级锁，阻止操作中的数据发生变化；而防止读到新增数据，则往往需要添加表级锁，即将整张表锁定，防止新增数据。  </p>
-<h3 id="三、数据库锁机制"><a href="#三、数据库锁机制" class="headerlink" title="三、数据库锁机制"></a>三、数据库锁机制</h3><p>&emsp;&emsp;数据并发会引发很多问题，在一些场合下有些问题是允许的，但在另一些场合下可能是致命的。数据库通过锁机制解决并发访问的问题。按锁定的对象不同，一般可以分为<strong>表锁定</strong>和<strong>行锁定</strong>。前者对整张表进行锁定，后者对表中的特定行进行锁定。从并发事务锁定的关系上看，可以分为<strong>共享锁定</strong>和<strong>独占锁定</strong>。共享锁定会防止独占锁定，但允许其他的共享锁定；而独占锁定既防止其他的独占锁定，也防止其他的共享锁定。</p>
-<h3 id="四、事务隔离级别"><a href="#四、事务隔离级别" class="headerlink" title="四、事务隔离级别"></a>四、事务隔离级别</h3><p>&emsp;&emsp;尽管数据库为用户提供了锁的DML操作方式，但直接使用锁管理是非常麻烦的，因为数据库为用户提供了自动锁机制。只要用户指定会话的事务隔离级别，数据库就会分析事务中的SQL语句，然后自动为事务操作的数据资源添加适合的锁。此外，数据库还会维护这些锁，当一个资源上的锁数目太多时，自动进行锁升级以提高系统的运行性能，这对用户来说是透明的。</p>
-<p>&emsp;&emsp;ANSI/ISO SQL92标准定义了4个等级的事务隔离级别，在相同的数据环境下，使用相同的输入，执行相同的工作，根据不同的隔离级别，可能导致不同的结果。不同事务隔离级别能够解决的数据并发问题的能力是不同的。 </p>
-<table>
-<thead>
-<tr>
-<th align="center">隔离级别</th>
-<th align="center">脏读</th>
-<th align="center">不可重复读</th>
-<th align="center">幻象读</th>
-<th align="center">第一类丢失更新</th>
-<th align="center">第二类丢失更新</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">READ UNCOMMITED</td>
-<td align="center">1</td>
-<td align="center">1</td>
-<td align="center">1</td>
-<td align="center">0</td>
-<td align="center">1</td>
-</tr>
-<tr>
-<td align="center">READ COMITED</td>
-<td align="center">0</td>
-<td align="center">1</td>
-<td align="center">1</td>
-<td align="center">0</td>
-<td align="center">1</td>
-</tr>
-<tr>
-<td align="center">REPEATABLE READ</td>
-<td align="center">0</td>
-<td align="center">0</td>
-<td align="center">1</td>
-<td align="center">0</td>
-<td align="center">0</td>
-</tr>
-<tr>
-<td align="center">SERIALIZABLE</td>
-<td align="center">0</td>
-<td align="center">0</td>
-<td align="center">0</td>
-<td align="center">0</td>
-<td align="center">0</td>
-</tr>
-</tbody></table>
+        <h2 id="一、解决什么问题？"><a href="#一、解决什么问题？" class="headerlink" title="一、解决什么问题？"></a>一、解决什么问题？</h2><blockquote>
+<p>（1）数据量大<br>（2）需要水平切分<br>（3）一个schema上有多个字段的查询需求  </p>
+<p>举例：订单业务<br>Order(oid, info_detail)<br>T(buyer_id, seller_id, oid)<br>数据量大了怎么办？一个表一个库是存不下的，这个时候往往需要进行水平切分。订单表很容易进行水平切分，根据订单id进行表切分，查询的时候可以根据订单id直接定位到它水平切分到哪个库或者哪个表里面。但是关系表怎么切分呢？有买家id、卖家id,如果通过买家id来水平切分，保证同一个买家id的数据在一个库里或一个表里，根据买家id可以定位到这个买家有多少个订单id，这里如果要用卖家id来查询的话，就需要遍历多个库了；反之如果用卖家id来进行分库分表，同一个卖家的订单关系在一个库或一个表里，此时如果用买家id来查询订单，也需要遍历多个库或多个表。所以不管用买家id还是卖家id来进行水平切分，都有另外一种业务是无法满足的，如果要满足就需要扫描多库，在库的数量非常多数据量非常大的时候，扫描多库的性能是非常非常的低。</p>
+</blockquote>
+<h2 id="二、如何解决？"><a href="#二、如何解决？" class="headerlink" title="二、如何解决？"></a>二、如何解决？</h2><blockquote>
+<p> 如果用大学数据库学的范式来解决，几乎是无解的，所以在互联网的某些场景之下，只有逆范式或反范式来设计表结构，进行数据冗余才可以满足在多个业务场景下多个查询条件下的水平切分的需求。  </p>
+<p> <strong>冗余表</strong><br> Order(oid, info_detail)<br> T1(buyer_id, seller_id, oid)<br> T2(seller_id, buyer_id, oid)  </p>
+</blockquote>
+<h2 id="三、如何冗余？"><a href="#三、如何冗余？" class="headerlink" title="三、如何冗余？"></a>三、如何冗余？</h2><blockquote>
+<p><strong>（1）服务同步冗余</strong><br> 在进行表数据插入时，同时插入到T1,T2两张表中<br> 优点：1.不复杂; 2.不一致性概率低<br> 缺点：1.因为要插入两张表数据，处理业务时间增加； 2.仍然可能出现不一致</p>
+<p><strong>（2）服务异步冗余</strong><br> 增加一个消息队列，当插入T1表后，向消息队列中发送一个消息，然后由另外一个服务将数据插入到T2表中<br> 优点：访问一次数据库，与不冗余数据时时间相同<br> 缺点：1.复杂度增加，增加一个MQ； 2.消息发送成功不等于T2插入成功，此时查询T2会查询不到数据，但这个时间比较短，业务上往往是可以接受的； 3.不在一个分布式事务里，会出现数据不一致性  </p>
+<p><strong>（3）线下异步冗余</strong><br>  添加一个bin log，然后调用服务进行T2表的数据插入<br>  优点：两次写操作解耦<br>  缺点：1.有延时，可能在T2中查询不到数据； 2.会出现数据不一致性问题  </p>
+</blockquote>
+<h2 id="四、“原子性事务”，正向表和反向表谁先操作？"><a href="#四、“原子性事务”，正向表和反向表谁先操作？" class="headerlink" title="四、“原子性事务”，正向表和反向表谁先操作？"></a>四、“原子性事务”，正向表和反向表谁先操作？</h2><blockquote>
+<p>如果原子性被破坏，不一致出现，谁先做对业务的影响较小，就谁先执行</p>
+</blockquote>
+<h2 id="五、如何保证一致性？"><a href="#五、如何保证一致性？" class="headerlink" title="五、如何保证一致性？"></a>五、如何保证一致性？</h2><blockquote>
+<p>在大数据、高并发、延迟敏感的业务中，并不能实时保证一致性，而是尽可能的发现数据不一致性，然后保证最终一致性。</p>
+</blockquote>
+<h2 id="六、如何保证一致性？"><a href="#六、如何保证一致性？" class="headerlink" title="六、如何保证一致性？"></a>六、如何保证一致性？</h2><blockquote>
+<p> <strong>（1）全量数据扫描</strong><br>写一个离线程序，定时每天检查一次T1和T2表中数据是否一致，不一致的话进行补偿，使数据一致<br>优点：解耦<br>缺点：每天都需要大量检测，已经检测过的数据会重复检测，需要耗费的时间长，会导致数据不一致性的时间长</p>
+<p> <strong>（2）增量日志扫</strong><br>服务插入T1或T2表后向T1日志或T2日志中写一条日志数据，然后写一个离线的程序，对日志进行检测，发现不一致则进行补偿，使数据一致<br>优点：1.不会重复检测数据； 2.检测周期缩短； 3.线上影响比较低<br>缺点：时效性还是不高  </p>
+<p><strong>（3）实时消息对检测</strong><br> 增加一个消息队列，插入T1成功后就向消息队列中发送一条消息，插入T2d成功后，就向消息队列中发送一条消息，根据经验，5秒内能收到2条消息，如果未收到消息，则检测数据库数据是否一致<br> 缺点：复杂度高  </p>
+</blockquote>
 
     </div>
 
@@ -328,43 +293,10 @@
 		<div>
 			  
 				
-<div class="my_post_copyright">
-  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
-  
-  <!-- JS库 sweetalert 可修改路径 -->
-  <script src="https://cdn.bootcss.com/jquery/2.0.0/jquery.min.js"></script>
-  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-  <p><span>本文标题:</span><a href="/2020/11/18/202011182114/">数据库事务</a></p>
-  <p><span>文章作者:</span><a href="/" title="访问  的个人博客"></a></p>
-  <p><span>发布时间:</span>2020年11月18日 - 21:11</p>
-  <p><span>最后更新:</span>2021年01月03日 - 20:01</p>
-  <p><span>原始链接:</span><a href="/2020/11/18/202011182114/" title="数据库事务">http://www.liyyao.com/2020/11/18/202011182114/</a>
-    <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="http://www.liyyao.com/2020/11/18/202011182114/"  aria-label="复制成功！"></i></span>
-  </p>
-  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-禁止演绎 4.0 国际</a> 转载请保留原文链接及作者。</p>  
-</div>
-<script> 
-    var clipboard = new Clipboard('.fa-clipboard');
-	  $(".fa-clipboard").click(function(){
-      clipboard.on('success', function(){
-        swal({   
-          title: "",   
-          text: '复制成功',
-          icon: "success", 
-          showConfirmButton: true
-          });
-	});
-    });  
-</script>
-
 			  
 		</div>
 
       <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/database/" rel="tag"># database</a>
-              <a href="/tags/tx/" rel="tag"># tx</a>
-          </div>
 
         
 
@@ -372,12 +304,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/10/18/202010181635/" rel="prev" title="闲言碎语">
-      <i class="fa fa-chevron-left"></i> 闲言碎语
+    <a href="/202008302202.html" rel="prev" title="Ubuntu/优麒麟安装deepin-wine微信的方法">
+      <i class="fa fa-chevron-left"></i> Ubuntu/优麒麟安装deepin-wine微信的方法
     </a></div>
       <div class="post-nav-item">
-    <a href="/2020/12/06/202012062053/" rel="next" title="地下室手记">
-      地下室手记 <i class="fa fa-chevron-right"></i>
+    <a href="/202009132041.html" rel="next" title="Dubbo集成Nacos">
+      Dubbo集成Nacos <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -437,7 +369,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1%E7%9A%844%E4%B8%AA%E7%89%B9%E6%80%A7%EF%BC%88ACID%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">一、数据库事务的4个特性（ACID）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E4%BA%8B%E5%8A%A1%E7%9A%84%E5%B9%B6%E5%8F%91%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">二、事务的并发问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%95%B0%E6%8D%AE%E5%BA%93%E9%94%81%E6%9C%BA%E5%88%B6"><span class="nav-number">3.</span> <span class="nav-text">三、数据库锁机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="nav-number">4.</span> <span class="nav-text">四、事务隔离级别</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E8%A7%A3%E5%86%B3%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">一、解决什么问题？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">二、如何解决？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%A6%82%E4%BD%95%E5%86%97%E4%BD%99%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">三、如何冗余？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E2%80%9C%E5%8E%9F%E5%AD%90%E6%80%A7%E4%BA%8B%E5%8A%A1%E2%80%9D%EF%BC%8C%E6%AD%A3%E5%90%91%E8%A1%A8%E5%92%8C%E5%8F%8D%E5%90%91%E8%A1%A8%E8%B0%81%E5%85%88%E6%93%8D%E4%BD%9C%EF%BC%9F"><span class="nav-number">4.</span> <span class="nav-text">四、“原子性事务”，正向表和反向表谁先操作？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E4%B8%80%E8%87%B4%E6%80%A7%EF%BC%9F"><span class="nav-number">5.</span> <span class="nav-text">五、如何保证一致性？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E4%B8%80%E8%87%B4%E6%80%A7%EF%BC%9F"><span class="nav-number">6.</span> <span class="nav-text">六、如何保证一致性？</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -453,7 +385,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-count">14</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -464,7 +396,7 @@
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-count">5</span>
         <span class="site-state-item-name">标签</span>
       </div>
   </nav>
@@ -507,7 +439,7 @@
 
 <div class="theme-info">
   <div class="powered-by"></div>
-  <span class="post-count">博客全站共8.3k字</span>
+  <span class="post-count">博客全站共10k字</span>
 </div>
 <!--
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动

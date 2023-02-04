@@ -652,4 +652,364 @@ $ hexo clean
 <p><img src="/202108222111/2021082207.png" alt="查看ip"> </p>
 ]]></content>
   </entry>
+  <entry>
+    <title>Centos7 防火墙配置</title>
+    <url>/202108232023.html</url>
+    <content><![CDATA[<h5 id="1-查看防火墙服务状态"><a href="#1-查看防火墙服务状态" class="headerlink" title="1.查看防火墙服务状态"></a>1.查看防火墙服务状态</h5><pre><code># systemctl status firewalld</code></pre>
+<h5 id="2-查看防火墙状态"><a href="#2-查看防火墙状态" class="headerlink" title="2.查看防火墙状态"></a>2.查看防火墙状态</h5><pre><code># firewall-cmd --state</code></pre>
+<h5 id="3-开启、重启、关闭防火墙服务"><a href="#3-开启、重启、关闭防火墙服务" class="headerlink" title="3.开启、重启、关闭防火墙服务"></a>3.开启、重启、关闭防火墙服务</h5><pre><code># 开启
+# service firewalld start 或 # systemctl start firewalld.service
+# 重启
+# service firewalld restart
+# 关闭
+# service firewalld stop 或 # systemctl stop firewalld.service
+# 关闭防火墙开机启动
+# systemctl disable firewalld.service
+# 开启防火墙开机启动
+# systemctl enable firewalld.service</code></pre>
+<h5 id="4-查看防火墙规则"><a href="#4-查看防火墙规则" class="headerlink" title="4.查看防火墙规则"></a>4.查看防火墙规则</h5><pre><code># firewall-cmd --list-all</code></pre>
+<h5 id="5-查询、开放、关闭端口"><a href="#5-查询、开放、关闭端口" class="headerlink" title="5.查询、开放、关闭端口"></a>5.查询、开放、关闭端口</h5><pre><code># 查询端口是否开放
+# firewall-cmd --query-port=8080/tcp
+# 开放80端口
+# firewall-cmd --permanent --add-port=80/tcp
+# 移除端口
+# firewall-cmd --permanent --remove-port=8080/tcp
+
+#重启防火墙（修改配置后要重启防火墙）
+# firewall-cmd --reload</code></pre>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>Linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SPI</title>
+    <url>/202302041119.html</url>
+    <content><![CDATA[<h1 id="1、什么是SPI？"><a href="#1、什么是SPI？" class="headerlink" title="1、什么是SPI？"></a>1、什么是SPI？</h1><p>​    <strong>SPI</strong>全称为Service Provider Interface，是一种服务发现机制。它通过在ClassPath路径下的META-INF/services文件夹查找文件，自动加载文件里所定义的类。这一机制为很多框架扩展提供了可能，比如现在的Dubbo、JDBC中都使用到了SPI机制。为什么要学SPI，因为在SpringBoot的自动装配中其实有使用到SPI机制，所以掌握了这部分对于SpringBoot的学习还是很有帮助的。</p>
+<p>​    总结：SPI就是我定义接口，你去实现这些接口，然后在某个文件里告诉我实现是什么即可。</p>
+<h1 id="2、案例"><a href="#2、案例" class="headerlink" title="2、案例"></a>2、案例</h1><p>​    我们Java在进行数据库连接时使用的JDBC，数据库的种类比较多，我们常用的就是MySQL和Oracle，如果没有一个访问数据库的统一接口，那么连接不同的数据库就需要写不同的程序，这样对程序员来说比较繁琐，而JDBC就提供了一些接口，定义了操作数据库的抽象行为，由各个数据库厂商自己实现。</p>
+<h2 id="2-1-程序是怎么知道这些接口是由哪些Java类实现的呢？"><a href="#2-1-程序是怎么知道这些接口是由哪些Java类实现的呢？" class="headerlink" title="2.1 程序是怎么知道这些接口是由哪些Java类实现的呢？"></a>2.1 程序是怎么知道这些接口是由哪些Java类实现的呢？</h2><p>​    基于这个点，SPI定义了一个规范，实现者要在META-INF/services下创建接口名的文件，然后在文件中是接口的具体实现类。</p>
+<h2 id="2-2-案例介绍"><a href="#2-2-案例介绍" class="headerlink" title="2.2 案例介绍"></a>2.2 案例介绍</h2><p>​    先定义接口项目</p>
+<p><img src="/202302041119/.%5CSPI%5CSPI-01.png"></p>
+<p>​    然后创建一个扩展的实现，先导入上面接口项目的依赖</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.liyyao<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>MyDataBase<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>​    然后创建接口的实现</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * SPI：MySQL对于getUrl的一种实现</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MySqlConnection</span> <span class="keyword">implements</span> <span class="title">Connection</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getUrl</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;mysql...&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    然后在resources目录下创建META-INF/services目录，然后在目录中创建一个文件，名称必须是定义的接口的全类路径名称。然后在文件中写上接口的实现类的全类路径名称。</p>
+<p><img src="/202302041119/.%5CSPI%5CSPI-02.png"></p>
+<p>同样的再创建一个扩展的实现</p>
+<p><img src="/202302041119/.%5CSPI%5CSPI-03.png"></p>
+<p>然后创建一个测试的项目，导入扩展的项目，然后进行测试，测试代码如下</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    ServiceLoader&lt;Connection&gt; load = ServiceLoader.load(Connection.class);</span><br><span class="line">    Iterator&lt;Connection&gt; iterator = load.iterator();</span><br><span class="line">    <span class="keyword">while</span> (iterator.hasNext()) &#123;</span><br><span class="line">        Connection con = iterator.next();</span><br><span class="line">        con.getUrl();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据不同的导入，执行的逻辑会有不同</p>
+<p><img src="/202302041119/.%5CSPI%5CSPI-04.png"></p>
+<p><img src="/202302041119/.%5CSPI%5CSPI-05.png"></p>
+<h1 id="3、源码查看"><a href="#3、源码查看" class="headerlink" title="3、源码查看"></a>3、源码查看</h1><h2 id="3-1、ServiceLoader"><a href="#3-1、ServiceLoader" class="headerlink" title="3.1、ServiceLoader"></a>3.1、ServiceLoader</h2><p>​    首先来看下ServiceLoader的类结构</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 配置文件的路径</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String PREFIX = <span class="string">&quot;META-INF/services/&quot;</span>;</span><br><span class="line"><span class="comment">// 加载的服务 类或者接口</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Class&lt;S&gt; service;</span><br><span class="line"><span class="comment">// 类加载器</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ClassLoader loader;</span><br><span class="line"><span class="comment">// 访问权限的上下文对象</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> AccessControlContext acc;</span><br><span class="line"><span class="comment">// 保存已经加载的服务类</span></span><br><span class="line"><span class="keyword">private</span> LinkedHashMap&lt;String,S&gt; providers = <span class="keyword">new</span> LinkedHashMap&lt;&gt;();</span><br><span class="line"><span class="comment">// 内部类，真正加载服务类</span></span><br><span class="line"><span class="keyword">private</span> LazyIterator lookupIterator;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-2、load"><a href="#3-2、load" class="headerlink" title="3.2、load"></a>3.2、load</h2><p>​    load方法创建了一些属性，重要的是实例化了内部类，LazyIterator。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">ServiceLoader</span>&lt;<span class="title">S</span>&gt; <span class="keyword">implements</span> <span class="title">Iterable</span>&lt;<span class="title">S</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">ServiceLoader</span><span class="params">(Class&lt;S&gt; svc, ClassLoader cl)</span> </span>&#123;</span><br><span class="line">    	<span class="comment">//要加载的接口</span></span><br><span class="line">        service = Objects.requireNonNull(svc, <span class="string">&quot;Service interface cannot be null&quot;</span>);</span><br><span class="line">        <span class="comment">//类加载器</span></span><br><span class="line">        loader = (cl == <span class="keyword">null</span>) ? ClassLoader.getSystemClassLoader() : cl;</span><br><span class="line">        <span class="comment">//访问控制器</span></span><br><span class="line">        acc = (System.getSecurityManager() != <span class="keyword">null</span>) ? AccessController.getContext():<span class="keyword">null</span>;</span><br><span class="line">        reload();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">reload</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    	<span class="comment">//先清空</span></span><br><span class="line">        providers.clear();</span><br><span class="line">        <span class="comment">//实例化内部类</span></span><br><span class="line">        lookupIterator = <span class="keyword">new</span> LazyIterator(service, loader);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    查找实现类和创建实现类的过程，都在LazyIterator完成。当我们调用iterator.hasNext和iterator.next方法时，实际上调用的都是LazyIterator的相应方法。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">LazyIterator</span> <span class="keyword">implements</span> <span class="title">Iterator</span>&lt;<span class="title">S</span>&gt; </span>&#123;</span><br><span class="line">    Class&lt;S&gt; service;</span><br><span class="line">    ClassLoader loader;</span><br><span class="line">    Enumeration&lt;URL&gt; configs = <span class="keyword">null</span>;</span><br><span class="line">    Iterator&lt;String&gt; pending = <span class="keyword">null</span>;</span><br><span class="line">    String nextName = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">hasNextService</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (nextName != <span class="keyword">null</span>) &#123;</span><br><span class="line">        	<span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (configs == <span class="keyword">null</span>) &#123;</span><br><span class="line">        	<span class="comment">//META-INF/services/ 加上接口的全限定类名，就是文件服务类的文件</span></span><br><span class="line">            String fullName = PREFIX + service.getName();</span><br><span class="line">            <span class="comment">//将文件路径转成URL对象</span></span><br><span class="line">            configs = loader.getResources(fullName);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> ((pending == <span class="keyword">null</span>) || !pending.hasNext()) &#123;</span><br><span class="line">			<span class="comment">//解析URL文件对象，读取内容，最后返回</span></span><br><span class="line">       		pending = parse(service, configs.nextElement());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//拿到第一个实现类的类名</span></span><br><span class="line">        nextName = pending.next();</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    创建实例对象，当然，调用next方法时，实际调用到的是lookupIterator.nextService。它通过反射的方式，创建实现类的实例并返回。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">LazyIterator</span> <span class="keyword">implements</span> <span class="title">Iterator</span>&lt;<span class="title">S</span>&gt; </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">private</span> S <span class="title">nextService</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="comment">//全限定类名</span></span><br><span class="line">        String cn = nextName;</span><br><span class="line">        nextName = <span class="keyword">null</span>;</span><br><span class="line">        <span class="comment">//创建类的Class对象</span></span><br><span class="line">        Class&lt;?&gt; c = Class.forName(cn, <span class="keyword">false</span>, loader);</span><br><span class="line">        <span class="comment">//通过newInstance实例化</span></span><br><span class="line">        S p = service.cast(c.newInstance());</span><br><span class="line">        <span class="comment">//放入集合，返回实例</span></span><br><span class="line">        providers.put(cn, p);</span><br><span class="line">        <span class="keyword">return</span> p;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    看到这儿应该很清楚了，获取到类的实例，然后就可以做事情了。</p>
+]]></content>
+      <categories>
+        <category>SpringBoot</category>
+      </categories>
+      <tags>
+        <tag>SpringBoot</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>微服务配置中心</title>
+    <url>/202108241927.html</url>
+    <content><![CDATA[<p>进行技术选型，首先应该是站在一个细化的角度，从各个方面去对比技术。</p>
+<p>哪个技术最热门，用的人最多，那么就选用哪个技术。如果都很热门，用的人都很多，怎么选？<br>分场景，每种技术适合什么场景；<br>分公司，每种技术适合小公司还是大公司；</p>
+<p>选型：Apollo、SpringCloudConfig、Nacos</p>
+<p>apollo: 架构比较复杂，比较完善的，功能上也很完善，中小型公司并不一定要使用，中大型公司可以考虑使用。<br><a href="https://github.com/ctripcorp/apollo">https://github.com/ctripcorp/apollo</a></p>
+<p>nacos: 作为一个服务注册中心本身就包含了配置中心的功能，没必要花很多时间再去部署一套apollo，完全可以满足很多中小型公司的配置中心的需求，哪怕是大公司也是可以用的，apollo确实用的公司很多，中大型公司都会去用apollo，而且他的功能也很完善。</p>
+<p>spring cloud config: 如果用的不是spring cloud alibaba，用的是apring cloud netflix，可以配合那个技术栈，直接使用spring cloud提供的config项目作为配置中心就可以了，因为这是属于spring cloud原生技术栈里提供的。</p>
+]]></content>
+      <categories>
+        <category>微服务</category>
+      </categories>
+      <tags>
+        <tag>微服务</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>active-mq安装</title>
+    <url>/202108222216.html</url>
+    <content><![CDATA[<h4 id="一、安装步骤"><a href="#一、安装步骤" class="headerlink" title="一、安装步骤"></a>一、安装步骤</h4><h5 id="1-从activemq官网下载activemq"><a href="#1-从activemq官网下载activemq" class="headerlink" title="1.从activemq官网下载activemq"></a>1.从activemq官网下载activemq</h5><blockquote>
+<p> <a href="http://activemq.apache.org/">http://activemq.apache.org/</a>  </p>
+</blockquote>
+<h5 id="2-将下载好的activemq的gz包上传到Linux服务器"><a href="#2-将下载好的activemq的gz包上传到Linux服务器" class="headerlink" title="2.将下载好的activemq的gz包上传到Linux服务器"></a>2.将下载好的activemq的gz包上传到Linux服务器</h5><h5 id="3-解压activemq包"><a href="#3-解压activemq包" class="headerlink" title="3.解压activemq包"></a>3.解压activemq包</h5><blockquote>
+<pre><code># tar zvxf apache-activemq-5.16.2-bin.tar.gz </code></pre>
+</blockquote>
+<h5 id="4-启动activemq"><a href="#4-启动activemq" class="headerlink" title="4.启动activemq"></a>4.启动activemq</h5><blockquote>
+</blockquote>
+<pre><code>首先进入到mq的bin目录，然后通过./activemq start启动，以下表示启动成功！
+# ./activemq start </code></pre>
+<p><img src="/202108222216/activemq01.png" alt="启动activemq">  </p>
+<h4 id="二、安装遇到的问题"><a href="#二、安装遇到的问题" class="headerlink" title="二、安装遇到的问题"></a>二、安装遇到的问题</h4><h5 id="1-查看activemq安装状态"><a href="#1-查看activemq安装状态" class="headerlink" title="1.查看activemq安装状态"></a>1.查看activemq安装状态</h5><blockquote>
+<pre><code># ./activemq status</code></pre>
+</blockquote>
+<h5 id="2-查看activemq运行日志"><a href="#2-查看activemq运行日志" class="headerlink" title="2.查看activemq运行日志"></a>2.查看activemq运行日志</h5><blockquote>
+<pre><code># ./activemq consile</code></pre>
+</blockquote>
+<h4 id="三、访问ActiveMQ页面"><a href="#三、访问ActiveMQ页面" class="headerlink" title="三、访问ActiveMQ页面"></a>三、访问ActiveMQ页面</h4><p>待ActiveMQ安装启动好，访问<a href="http://ip:8161/admin%EF%BC%8C%E7%99%BB%E5%BD%95%E5%90%8D%E5%92%8C%E5%AF%86%E7%A0%81%E9%83%BD%E6%98%AFadmin(%E5%9C%A8%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%B8%AD%E5%8F%AF%E4%BF%AE%E6%94%B9)%EF%BC%8C%E8%BF%9B%E5%85%A5ActiveMQ%E7%9A%84%E4%B8%BB%E9%A1%B5%EF%BC%9A">http://ip:8161/admin，登录名和密码都是admin(在配置文件中可修改)，进入ActiveMQ的主页：</a><br><img src="/202108222216/activemq06.png" alt="activemq web页面"></p>
+<p>页面访问不成功问题排查：<br><strong>1.Linux服务器的8161端口是否开放,如果没有开放，就开放8161端口</strong></p>
+<blockquote>
+<pre><code># 查看端口是否开放
+# firewall-cmd --query-port=8161/tcp  
+# 开放端口
+# firewall-cmd --permanent --add-port=8161/tcp
+# 重启防火墙
+# firewall-cmd --reload</code></pre>
+</blockquote>
+<p><strong>2.查看日志，是否有存储大小设置过大，如果过大，修改配置文件</strong></p>
+<blockquote>
+</blockquote>
+<pre><code># vim ./conf/activemq.xml</code></pre>
+<p><img src="/202108222216/activemq07.png" alt="activemq.xml配置文件修改">  </p>
+<p><strong>3.如果是用ip访问，而不是localhost或127.0.0.1访问，查看conf/jetty.xml配置文件，注释掉127.0.0.1这行</strong></p>
+<blockquote>
+</blockquote>
+<pre><code># vim ./conf/jetty.xml</code></pre>
+<p><img src="/202108222216/activemq08.png" alt="jetty.xml配置文件修改"></p>
+<h4 id="四、ActiveMQ页面介绍"><a href="#四、ActiveMQ页面介绍" class="headerlink" title="四、ActiveMQ页面介绍"></a>四、ActiveMQ页面介绍</h4><h5 id="1-Queue消息队列页面"><a href="#1-Queue消息队列页面" class="headerlink" title="1.Queue消息队列页面"></a>1.Queue消息队列页面</h5><p><img src="/202108222216/activemq09.png" alt="jetty.xml配置文件修改">  </p>
+<pre><code>Name: 消息队列名称
+Number Of Pending Messages: 未被消费的消息数目
+Number Of Consumers: 消费者的数量
+Message Enqueued: 进入队列的消息；进入队列的总消息数目，包括已经被消费的和未被消费的。这个数量只增不减。
+Message Dequeued: 已出队列的消息，即已被消费掉的消息数目。因为一个消息只会被成功消费一次，所以在Queues里它和进入队列的总数量相等，如果不等是因为有消息未被消费。</code></pre>
+<h5 id="2-Topic主题页面"><a href="#2-Topic主题页面" class="headerlink" title="2.Topic主题页面"></a>2.Topic主题页面</h5><p><img src="/202108222216/activemq10.png" alt="jetty.xml配置文件修改">  </p>
+<pre><code>Name: 主题名称
+Number Of Pending Messages: 未被消费的消息数目
+Number Of Consumers: 消费者的数量
+Message Enqueued: 进入队列的消息；进入队列的总消息数目，包括已经被消费的和未被消费的。这个数量只增不减。
+Message Dequeued: 已出队列的消息，即已被消费掉的消息数目。在Topics里，因为多消费者从而导致数量会比入队列数高。</code></pre>
+<h5 id="3-Subscribers查看订阅者页面"><a href="#3-Subscribers查看订阅者页面" class="headerlink" title="3.Subscribers查看订阅者页面"></a>3.Subscribers查看订阅者页面</h5><p><img src="/202108222216/activemq11.png" alt="jetty.xml配置文件修改">  </p>
+<pre><code>查看订阅者信息，只在Topics消息类型中这个页面才会有数据。</code></pre>
+<h5 id="4-Connections查看连接数页面"><a href="#4-Connections查看连接数页面" class="headerlink" title="4.Connections查看连接数页面"></a>4.Connections查看连接数页面</h5><p><img src="/202108222216/activemq12.png" alt="jetty.xml配置文件修改">  </p>
+<h4 id="五、ActiveMQ简单使用"><a href="#五、ActiveMQ简单使用" class="headerlink" title="五、ActiveMQ简单使用"></a>五、ActiveMQ简单使用</h4><blockquote>
+<p>  <strong>引入jar包</strong> </p>
+</blockquote>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.activemq&lt;/groupId&gt;
+    &lt;artifactId&gt;activemq-core&lt;/artifactId&gt;
+    &lt;version&gt;5.7.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+<hr>
+<blockquote>
+<p><strong>1.点对点(P2P)模型</strong><br>&emsp;&emsp;点对点模型，采用的是队列（Queue）作为消息载体。在该模式中，一条消息只能被一个消费者消费，只能留在队列中，等待被消费，或者超时。例如：生产者生产了一个消息，只能由一个消费者进行消费，代码演示如下：</p>
+</blockquote>
+<blockquote>
+</blockquote>
+<p>Provider步骤：<br>    第一步：创建ConnectionFactory对象，需要指定服务端ip及端口号。<br>    第二步：使用ConnectionFactory对象创建一个Connection对象。<br>    第三步：开启连接，调用Connection对象的start方法。<br>    第四步：使用Connection对象创建一个Session对象。<br>    第五步：使用Session对象创建一个Destination对象（topic、queue），此处创建一个Queue对象。<br>    第六步：使用Session对象创建一个Producer对象。<br>    第七步：创建一个Message对象，创建一个TextMessage对象。<br>    第八步：使用Producer对象发送消息。<br>    第九步：关闭资源。 </p>
+<blockquote>
+</blockquote>
+<pre><code>public class Provider &#123;
+    private static String queue = &quot;demo&quot;;
+    public static void main(String[] args) throws JMSException &#123;
+        //第一步：创建ConnectionFactory对象，需要指定服务端ip及端口号
+        //brokerURL服务器的ip及端口号
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(&quot;tcp://192.168.31.3:61616&quot;);
+        //第二步：使用ConnectionFactory对象创建一个Connection对象。
+        Connection connection = connectionFactory.createConnection();
+        //第三步：开启连接，调用Connection对象的start方法。
+        connection.start();
+        //第四步：使用Connection对象创建一个Session对象。
+        //第一个参数：是否开启事务。当为true时，开启事务，同时第二个参数可以忽略
+        //第二个参数：消息的应答模式：1、自动应答；2、手动应答。当第一个参数为false时，才有意义。
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        //第五步：使用Session对象创建一个Destination对象（topic、queue）,此处创建一个Queue对象。
+        //参数：队列名称
+        Queue queue = session.createQueue(Provider.queue);
+        //每六步：使用Session对象创建一个Producer对象。
+        MessageProducer producer = session.createProducer(queue);
+        for (int i = 0; i &lt; 10; i++) &#123;
+            //第七步：创建一个Message对象，创建一个TextMessage对象。
+            TextMessage textMessage = session.createTextMessage(&quot;消费者你好，我来了-&quot; + i);
+            //第八步：使用Producer对象发送消息。
+            producer.send(textMessage);
+        &#125;
+        System.out.println(&quot;----生产结束----&quot;);
+        //第九步：关闭资源
+        producer.close();
+        session.close();
+        connection.close();
+    &#125;
+&#125; </code></pre>
+<blockquote>
+</blockquote>
+<p>Consumer步骤:<br>    第一步：创建一个ConnectionFactory对象。<br>    第二步：从ConnectionFactory对象中获得一个Connection对象。<br>    第三步：开启连接。调用Connection对象的start方法。<br>    第四步：使用Connection对象创建一个Session对象。<br>    第五步：使用Session对象创建一个Destination对象。和发送端保持一致queue，并且队列的名称一致。<br>    第六步：使用Session对象创建一个Consumer对象。<br>    第七步：接收消息。<br>    第八步：打印消息。<br>    第九步：关闭资源  </p>
+<blockquote>
+<pre><code>public class Comsoner &#123;
+    private static String queue = &quot;demo&quot;;
+    public static void main(String[] args) throws JMSException, IOException &#123;
+        System.out.println(&quot;----消费结束----&quot;);
+        //第一步：创建一个ConnectionFactory对象
+        ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(&quot;tcp://192.168.31.3:61616&quot;);
+        //第二步：从ConnectionFactory对象中获得一个Connection对象。
+        Connection connection = factory.createConnection();
+        //第三步：开启连接。调用Connection对象的start方法。
+        connection.start();
+        //第四步：使用Connection对象创建一个Session对象。
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        //第五步：使用Session对象创建一个Destination对象。和发送端保持一致queue，并且队列的名称一致。
+        Queue queue = session.createQueue(Comsoner.queue);
+        //第六步：使用Session对象创建一个Consumer对象。
+        MessageConsumer consumer = session.createConsumer(queue);
+        //第七步：接收消息
+        consumer.setMessageListener(new MessageListener() &#123;
+            public void onMessage(Message message) &#123;
+                TextMessage textMessage = (TextMessage) message;
+                try &#123;
+                    String text = textMessage.getText();
+                    System.out.println(text);
+                &#125; catch (JMSException e) &#123;
+                    e.printStackTrace();
+                &#125;
+            &#125;
+        &#125;);
+        //第八步：关闭资源
+        consumer.close();
+        session.close();
+        connection.close();
+    &#125;
+&#125;</code></pre>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>2.发布/订阅（Pub/Sub）模型</strong><br>&emsp;&emsp;发布/订阅模型采用的是主题（Topic）作为消息通讯载体。该模式类似微信公众号的模式。发布者发布一条信息，然后将该信息传递给所有的订阅者。注意：订阅者想要接收到该消息，必须在该信息发布之前订阅。代码演示如下：</p>
+</blockquote>
+<blockquote>
+</blockquote>
+<p>Provider步骤：<br>    第一步：创建ConnectionFactory对象，需要指定服务端ip及端口号。<br>    第二步：使用ConnectionFactory对象创建一个Connection对象。<br>    第三步：开启连接，调用Connection对象的start方法。<br>    第四步：使用Connection对象创建一个Session对象。<br>    第五步：使用Session对象创建一个Destination对象（topic、queue），此处创建一个Queue对象。<br>    第六步：使用Session对象创建一个Producer对象。<br>    第七步：创建一个Message对象，创建一个TextMessage对象。<br>    第八步：使用Producer对象发送消息。<br>    第九步：关闭资源。 </p>
+<blockquote>
+</blockquote>
+<pre><code>public class Comsoner &#123;
+    private static String queue = &quot;topic&quot;;
+    public static void main(String[] args) throws JMSException, IOException &#123;
+        //第一步：创建ConnectionFactory对象，需要指定服务端ip及端口号。
+        //brokerURL服务器的ip及端口号
+        ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(&quot;tcp://192.168.31.3:61616&quot;);
+        //第二步：使用ConnectionFactory对象创建一个Connection对象。
+        Connection connection = factory.createConnection();
+        //第三步：开启连接，调用Connection对象的start方法。
+        connection.start();
+        //第四步：使用Connection对象创建一个Session对象。
+        //第一个参数：是否开启事务。true:开启，开启时第二个参数可以忽略
+        //第二个参数：当第一个参数为false时，这个参数才有意义。消息的应答模式：1-自动应答；2-手动应答
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        //第五步：使用Session对象创建一个Destination对象。和发送端保持一致topic，并且话题和名称一致
+        Topic topic = session.createTopic(queue);
+        //第六步：使用Session对象创建一个Consumer对象
+        MessageConsumer consumer = session.createConsumer(topic);
+        //第七步：接收消息
+        consumer.setMessageListener(new MessageListener() &#123;
+            public void onMessage(Message message) &#123;
+                TextMessage textMessage = (TextMessage) message;
+                try &#123;
+                    String text = textMessage.getText();
+                    System.out.println(text);
+                &#125; catch (JMSException e) &#123;
+                    e.printStackTrace();
+                &#125;
+            &#125;
+        &#125;);
+        System.out.println(&quot;topic的消费端。。。。&quot;);
+        //第八步：关闭资源
+        consumer.close();
+        session.close();
+        connection.close();
+    &#125;
+&#125;</code></pre>
+<blockquote>
+</blockquote>
+<p>Consumer步骤:<br>    第一步：创建一个ConnectionFactory对象。<br>    第二步：从ConnectionFactory对象中获得一个Connection对象。<br>    第三步：开启连接。调用Connection对象的start方法。<br>    第四步：使用Connection对象创建一个Session对象。<br>    第五步：使用Session对象创建一个Destination对象。和发送端保持一致queue，并且队列的名称一致。<br>    第六步：使用Session对象创建一个Consumer对象。<br>    第七步：接收消息。<br>    第八步：打印消息。<br>    第九步：关闭资源  </p>
+<blockquote>
+<pre><code>public class Comsoner &#123;
+    private static String queue = &quot;demo&quot;;
+    public static void main(String[] args) throws JMSException, IOException &#123;
+        System.out.println(&quot;----消费结束----&quot;);
+        //第一步：创建一个ConnectionFactory对象
+        ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(&quot;tcp://192.168.31.3:61616&quot;);
+        //第二步：从ConnectionFactory对象中获得一个Connection对象。
+        Connection connection = factory.createConnection();
+        //第三步：开启连接。调用Connection对象的start方法。
+        connection.start();
+        //第四步：使用Connection对象创建一个Session对象。
+        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        //第五步：使用Session对象创建一个Destination对象。和发送端保持一致queue，并且队列的名称一致。
+        Queue queue = session.createQueue(Comsoner.queue);
+        //第六步：使用Session对象创建一个Consumer对象。
+        MessageConsumer consumer = session.createConsumer(queue);
+        //第七步：接收消息
+        consumer.setMessageListener(new MessageListener() &#123;
+            public void onMessage(Message message) &#123;
+                TextMessage textMessage = (TextMessage) message;
+                try &#123;
+                    String text = textMessage.getText();
+                    System.out.println(text);
+                &#125; catch (JMSException e) &#123;
+                    e.printStackTrace();
+                &#125;
+            &#125;
+        &#125;);
+        //第八步：关闭资源
+        consumer.close();
+        session.close();
+        connection.close();
+    &#125;
+&#125;</code></pre>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>3.两种模式对比</strong><br>1)由以上，我们可以总结出ActiveMQ的实现步骤：  </p>
+</blockquote>
+<ul>
+<li>建立ConnectionFactory工厂对象，需要填入用户名、密码、连接地址  </li>
+<li>通过ConnectionFactory对象创建一个Connection连接  </li>
+<li>通过Connection对象创建Session会话  </li>
+<li>通过Session对象创建Destination对象；在P2P的模式中，Destination被称作队列（Queue）,在Pub/Sub模式中，Destination被称作主题（Topic）  </li>
+<li>通过Session对象创建消息的发送和接收对象  </li>
+<li>发送消息  </li>
+<li>关闭资源  </li>
+</ul>
+<blockquote>
+</blockquote>
+<p>2）可以看出，P2P模式和Pub/Sub模式，在实现上的区别是通过Session创建的Destination对象不一样，在P2P的模式中，Destination被称作队列（Queue）,在Pub/Sub模式中，Destination被称作主题（Topic）</p>
+<h4 id="六、JMS消息可靠机制"><a href="#六、JMS消息可靠机制" class="headerlink" title="六、JMS消息可靠机制"></a>六、JMS消息可靠机制</h4><blockquote>
+</blockquote>
+<p>ActiveMQ消息签收机制：客户端成功接收一条消息的标志是一条消息被签收，成功应答。     </p>
+<blockquote>
+</blockquote>
+<p>消息的签收情形分两种：<br>1、带事务的session。如果session带的事务，并且事务成功提交，则消息被自动签收。如果事务回滚，则消息会被再次传送。<br>2、不带事务的session。不带事务的session的签收方式，取决于session的配置。</p>
+<blockquote>
+</blockquote>
+<p>ActiveMQ支持以下三种模式：<br>1、Session.AUTO_ACKNOWLEDGE 消息自动签收<br>2、Session.CLIENT_ACKNOWLEDGE客户端调用acknowledge方法手动签收。<br>&emsp;&emsp;textMessage.acknowledge(); //手动签收<br>3、Session.DUPS_OK_ACKNOWLEDGE不是必须签收。<br>&emsp;&emsp;消息可能会重复发送。在第二次重新传送消息的时候，消息只有在被确认之后，才认为已经被成功地消费了。消息的成功消费通常包含三个阶段：客户接收消息、客户处理消息和消息被确认。在事务性会话中，当一个事务被提交的时候，确认自动发生。在非事务性会话中，消息何时被确认取决于创建会话时的应答模式（acknowledgement mode)。该参数有以下三个可选值：<br>Number Of Consumers 消费者 这个 是消费者端的消费者数量<br>Numbwr Of Pending Messages等待消费的消息 这个是当前未出队列的数量。可以理解为总接收数-总出队列数<br>Messages Enqueued 进入队列的消息 进入队列的总数量，包括出队列的。这个数量只增不减<br>Messages Dequeued 出了队列的消息 可以理解为是消费者消费掉的数量。</p>
+<h4 id="七、JMS可靠消息机制-持久话机制"><a href="#七、JMS可靠消息机制-持久话机制" class="headerlink" title="七、JMS可靠消息机制-持久话机制"></a>七、JMS可靠消息机制-持久话机制</h4><blockquote>
+</blockquote>
+<p>PERSISTENT：指示JMS provider持久保存消息，以保证消息不会因为JMS provider的失败而丢失<br>NON_PERSISTENT:不要求JMS provider持久保存消息<br>// 设置消息持久化 producer.setDeliveryMode(DeliveryMode.PERSISTENT);</p>
+]]></content>
+      <categories>
+        <category>mq</category>
+      </categories>
+      <tags>
+        <tag>mq</tag>
+      </tags>
+  </entry>
 </search>

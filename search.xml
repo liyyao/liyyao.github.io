@@ -316,7 +316,7 @@ public class Application &#123;
 <h1 id="2、案例"><a href="#2、案例" class="headerlink" title="2、案例"></a>2、案例</h1><p>​    我们Java在进行数据库连接时使用的JDBC，数据库的种类比较多，我们常用的就是MySQL和Oracle，如果没有一个访问数据库的统一接口，那么连接不同的数据库就需要写不同的程序，这样对程序员来说比较繁琐，而JDBC就提供了一些接口，定义了操作数据库的抽象行为，由各个数据库厂商自己实现。</p>
 <h2 id="2-1-程序是怎么知道这些接口是由哪些Java类实现的呢？"><a href="#2-1-程序是怎么知道这些接口是由哪些Java类实现的呢？" class="headerlink" title="2.1 程序是怎么知道这些接口是由哪些Java类实现的呢？"></a>2.1 程序是怎么知道这些接口是由哪些Java类实现的呢？</h2><p>​    基于这个点，SPI定义了一个规范，实现者要在META-INF/services下创建接口名的文件，然后在文件中是接口的具体实现类。</p>
 <h2 id="2-2-案例介绍"><a href="#2-2-案例介绍" class="headerlink" title="2.2 案例介绍"></a>2.2 案例介绍</h2><p>​    先定义接口项目</p>
-<p><img src="/202302041119/.%5CSPI%5CSPI-01.png"></p>
+<p><img src="/202302041119/SPI-01.png"></p>
 <p>​    然后创建一个扩展的实现，先导入上面接口项目的依赖</p>
 <figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.liyyao<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>MyDataBase<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
 

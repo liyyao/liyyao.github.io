@@ -1033,6 +1033,7 @@ Message Dequeued: 已出队列的消息，即已被消费掉的消息数目。�
 </li>
 <li><p>打开终端，输入：<code>ssh -T git@github.com</code> 会在bash中显示：</p>
 <p><code>Hi liyyao! You&#39;ve successfully authenticated, but GitHub does not provide shell access.</code><br><code>Connection to github.com closed.</code></p>
+<p><code>xxxxx</code></p>
 <p>看到此提示表示已经配置好了，再执行hexo deploy就不会有问题了。</p>
 </li>
 </ul>

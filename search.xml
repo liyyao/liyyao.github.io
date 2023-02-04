@@ -20,6 +20,57 @@ IPV6_PEERROUTES=yes  </code></pre>
       </tags>
   </entry>
   <entry>
+    <title>Centos7 没有ifconfig命令解决办法</title>
+    <url>/202108222111.html</url>
+    <content><![CDATA[<p>ifconfig命令用来查看ip信息，Linux最小化安装是没有ifconfig的，以下演示如果安装ifconfig。</p>
+<h5 id="1-输入ifconfig提示不存在"><a href="#1-输入ifconfig提示不存在" class="headerlink" title="1.输入ifconfig提示不存在"></a><strong>1.输入ifconfig提示不存在</strong></h5><p><img src="/202108222111/2021082201.png" alt="-bash: ifconfig: command not found">  </p>
+<h5 id="2-先确认是否因为环境变量没有ifconfig导致的"><a href="#2-先确认是否因为环境变量没有ifconfig导致的" class="headerlink" title="2.先确认是否因为环境变量没有ifconfig导致的"></a>2.先确认是否因为环境变量没有ifconfig导致的</h5><p><img src="/202108222111/2021082202.png" alt="环境变量"><br>  表示系统没有安装ifconfig</p>
+<h5 id="3-安装ifconfig"><a href="#3-安装ifconfig" class="headerlink" title="3.安装ifconfig"></a><strong>3.安装ifconfig</strong></h5><pre><code># yum install ifconfig  </code></pre>
+<p><img src="/202108222111/2021082203.png" alt="安装ifconfig"> </p>
+<h5 id="4-提示没有ifconfig安装包。再使用yum-search-ifconfig来搜索下ifconfig的相关"><a href="#4-提示没有ifconfig安装包。再使用yum-search-ifconfig来搜索下ifconfig的相关" class="headerlink" title="4.提示没有ifconfig安装包。再使用yum search ifconfig来搜索下ifconfig的相关"></a><strong>4.提示没有ifconfig安装包。再使用yum search ifconfig来搜索下ifconfig的相关</strong></h5><pre><code># yum search ifconfig  </code></pre>
+<p><img src="/202108222111/2021082204.png" alt="查看ifconfig相关"> </p>
+<h5 id="5-查看ifconfig匹配的是net-tools-x86-64包，安装net-tools-x86-64包"><a href="#5-查看ifconfig匹配的是net-tools-x86-64包，安装net-tools-x86-64包" class="headerlink" title="5.查看ifconfig匹配的是net-tools.x86_64包，安装net-tools.x86_64包"></a><strong>5.查看ifconfig匹配的是net-tools.x86_64包，安装net-tools.x86_64包</strong></h5><pre><code># yum install net-tools.x86_64 -y  </code></pre>
+<p><img src="/202108222111/2021082205.png" alt="安装net-tools.x86_64"> </p>
+<h5 id="6-输入ifconfig查看效果"><a href="#6-输入ifconfig查看效果" class="headerlink" title="6.输入ifconfig查看效果"></a><strong>6.输入ifconfig查看效果</strong></h5><pre><code># ifconfig</code></pre>
+<p><img src="/202108222111/2021082206.png" alt="查看ip"> </p>
+<h5 id="7-输入ip-addr也可以查询"><a href="#7-输入ip-addr也可以查询" class="headerlink" title="7.输入ip addr也可以查询"></a><strong>7.输入ip addr也可以查询</strong></h5><pre><code># ip addr</code></pre>
+<p><img src="/202108222111/2021082207.png" alt="查看ip"> </p>
+]]></content>
+  </entry>
+  <entry>
+    <title>Centos7 防火墙配置</title>
+    <url>/202108232023.html</url>
+    <content><![CDATA[<h5 id="1-查看防火墙服务状态"><a href="#1-查看防火墙服务状态" class="headerlink" title="1.查看防火墙服务状态"></a>1.查看防火墙服务状态</h5><pre><code># systemctl status firewalld</code></pre>
+<h5 id="2-查看防火墙状态"><a href="#2-查看防火墙状态" class="headerlink" title="2.查看防火墙状态"></a>2.查看防火墙状态</h5><pre><code># firewall-cmd --state</code></pre>
+<h5 id="3-开启、重启、关闭防火墙服务"><a href="#3-开启、重启、关闭防火墙服务" class="headerlink" title="3.开启、重启、关闭防火墙服务"></a>3.开启、重启、关闭防火墙服务</h5><pre><code># 开启
+# service firewalld start 或 # systemctl start firewalld.service
+# 重启
+# service firewalld restart
+# 关闭
+# service firewalld stop 或 # systemctl stop firewalld.service
+# 关闭防火墙开机启动
+# systemctl disable firewalld.service
+# 开启防火墙开机启动
+# systemctl enable firewalld.service</code></pre>
+<h5 id="4-查看防火墙规则"><a href="#4-查看防火墙规则" class="headerlink" title="4.查看防火墙规则"></a>4.查看防火墙规则</h5><pre><code># firewall-cmd --list-all</code></pre>
+<h5 id="5-查询、开放、关闭端口"><a href="#5-查询、开放、关闭端口" class="headerlink" title="5.查询、开放、关闭端口"></a>5.查询、开放、关闭端口</h5><pre><code># 查询端口是否开放
+# firewall-cmd --query-port=8080/tcp
+# 开放80端口
+# firewall-cmd --permanent --add-port=80/tcp
+# 移除端口
+# firewall-cmd --permanent --remove-port=8080/tcp
+
+#重启防火墙（修改配置后要重启防火墙）
+# firewall-cmd --reload</code></pre>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>Linux</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Dubbo集成Nacos</title>
     <url>/202009132041.html</url>
     <content><![CDATA[<h3 id="deom框架"><a href="#deom框架" class="headerlink" title="deom框架"></a>deom框架</h3><blockquote>
@@ -255,6 +306,52 @@ public class Application &#123;
 ]]></content>
       <tags>
         <tag>JVM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SPI</title>
+    <url>/202302041119.html</url>
+    <content><![CDATA[<h1 id="1、什么是SPI？"><a href="#1、什么是SPI？" class="headerlink" title="1、什么是SPI？"></a>1、什么是SPI？</h1><p>​    <strong>SPI</strong>全称为Service Provider Interface，是一种服务发现机制。它通过在ClassPath路径下的META-INF/services文件夹查找文件，自动加载文件里所定义的类。这一机制为很多框架扩展提供了可能，比如现在的Dubbo、JDBC中都使用到了SPI机制。为什么要学SPI，因为在SpringBoot的自动装配中其实有使用到SPI机制，所以掌握了这部分对于SpringBoot的学习还是很有帮助的。</p>
+<p>​    总结：SPI就是我定义接口，你去实现这些接口，然后在某个文件里告诉我实现是什么即可。</p>
+<h1 id="2、案例"><a href="#2、案例" class="headerlink" title="2、案例"></a>2、案例</h1><p>​    我们Java在进行数据库连接时使用的JDBC，数据库的种类比较多，我们常用的就是MySQL和Oracle，如果没有一个访问数据库的统一接口，那么连接不同的数据库就需要写不同的程序，这样对程序员来说比较繁琐，而JDBC就提供了一些接口，定义了操作数据库的抽象行为，由各个数据库厂商自己实现。</p>
+<h2 id="2-1-程序是怎么知道这些接口是由哪些Java类实现的呢？"><a href="#2-1-程序是怎么知道这些接口是由哪些Java类实现的呢？" class="headerlink" title="2.1 程序是怎么知道这些接口是由哪些Java类实现的呢？"></a>2.1 程序是怎么知道这些接口是由哪些Java类实现的呢？</h2><p>​    基于这个点，SPI定义了一个规范，实现者要在META-INF/services下创建接口名的文件，然后在文件中是接口的具体实现类。</p>
+<h2 id="2-2-案例介绍"><a href="#2-2-案例介绍" class="headerlink" title="2.2 案例介绍"></a>2.2 案例介绍</h2><p>​    先定义接口项目</p>
+<p><img src="/202302041119/.%5CSPI%5CSPI-01.png"></p>
+<p>​    然后创建一个扩展的实现，先导入上面接口项目的依赖</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.liyyao<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>MyDataBase<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>​    然后创建接口的实现</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * SPI：MySQL对于getUrl的一种实现</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MySqlConnection</span> <span class="keyword">implements</span> <span class="title">Connection</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getUrl</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;mysql...&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    然后在resources目录下创建META-INF/services目录，然后在目录中创建一个文件，名称必须是定义的接口的全类路径名称。然后在文件中写上接口的实现类的全类路径名称。</p>
+<p><img src="/202302041119/%5Cblog%5Cblog%5Csource_posts%5CSPI%5CSPI-02.png"></p>
+<p>同样的再创建一个扩展的实现</p>
+<p><img src="/202302041119/.%5CSPI%5CSPI-03.png"></p>
+<p>然后创建一个测试的项目，导入扩展的项目，然后进行测试，测试代码如下</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    ServiceLoader&lt;Connection&gt; load = ServiceLoader.load(Connection.class);</span><br><span class="line">    Iterator&lt;Connection&gt; iterator = load.iterator();</span><br><span class="line">    <span class="keyword">while</span> (iterator.hasNext()) &#123;</span><br><span class="line">        Connection con = iterator.next();</span><br><span class="line">        con.getUrl();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据不同的导入，执行的逻辑会有不同</p>
+<p><img src="/202302041119/.%5CSPI%5CSPI-04.png"></p>
+<p><img src="/202302041119/.%5CSPI%5CSPI-05.png"></p>
+<h1 id="3、源码查看"><a href="#3、源码查看" class="headerlink" title="3、源码查看"></a>3、源码查看</h1><h2 id="3-1、ServiceLoader"><a href="#3-1、ServiceLoader" class="headerlink" title="3.1、ServiceLoader"></a>3.1、ServiceLoader</h2><p>​    首先来看下ServiceLoader的类结构</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 配置文件的路径</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String PREFIX = <span class="string">&quot;META-INF/services/&quot;</span>;</span><br><span class="line"><span class="comment">// 加载的服务 类或者接口</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Class&lt;S&gt; service;</span><br><span class="line"><span class="comment">// 类加载器</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ClassLoader loader;</span><br><span class="line"><span class="comment">// 访问权限的上下文对象</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> AccessControlContext acc;</span><br><span class="line"><span class="comment">// 保存已经加载的服务类</span></span><br><span class="line"><span class="keyword">private</span> LinkedHashMap&lt;String,S&gt; providers = <span class="keyword">new</span> LinkedHashMap&lt;&gt;();</span><br><span class="line"><span class="comment">// 内部类，真正加载服务类</span></span><br><span class="line"><span class="keyword">private</span> LazyIterator lookupIterator;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-2、load"><a href="#3-2、load" class="headerlink" title="3.2、load"></a>3.2、load</h2><p>​    load方法创建了一些属性，重要的是实例化了内部类，LazyIterator。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">ServiceLoader</span>&lt;<span class="title">S</span>&gt; <span class="keyword">implements</span> <span class="title">Iterable</span>&lt;<span class="title">S</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">ServiceLoader</span><span class="params">(Class&lt;S&gt; svc, ClassLoader cl)</span> </span>&#123;</span><br><span class="line">    	<span class="comment">//要加载的接口</span></span><br><span class="line">        service = Objects.requireNonNull(svc, <span class="string">&quot;Service interface cannot be null&quot;</span>);</span><br><span class="line">        <span class="comment">//类加载器</span></span><br><span class="line">        loader = (cl == <span class="keyword">null</span>) ? ClassLoader.getSystemClassLoader() : cl;</span><br><span class="line">        <span class="comment">//访问控制器</span></span><br><span class="line">        acc = (System.getSecurityManager() != <span class="keyword">null</span>) ? AccessController.getContext():<span class="keyword">null</span>;</span><br><span class="line">        reload();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">reload</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    	<span class="comment">//先清空</span></span><br><span class="line">        providers.clear();</span><br><span class="line">        <span class="comment">//实例化内部类</span></span><br><span class="line">        lookupIterator = <span class="keyword">new</span> LazyIterator(service, loader);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    查找实现类和创建实现类的过程，都在LazyIterator完成。当我们调用iterator.hasNext和iterator.next方法时，实际上调用的都是LazyIterator的相应方法。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">LazyIterator</span> <span class="keyword">implements</span> <span class="title">Iterator</span>&lt;<span class="title">S</span>&gt; </span>&#123;</span><br><span class="line">    Class&lt;S&gt; service;</span><br><span class="line">    ClassLoader loader;</span><br><span class="line">    Enumeration&lt;URL&gt; configs = <span class="keyword">null</span>;</span><br><span class="line">    Iterator&lt;String&gt; pending = <span class="keyword">null</span>;</span><br><span class="line">    String nextName = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">hasNextService</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (nextName != <span class="keyword">null</span>) &#123;</span><br><span class="line">        	<span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (configs == <span class="keyword">null</span>) &#123;</span><br><span class="line">        	<span class="comment">//META-INF/services/ 加上接口的全限定类名，就是文件服务类的文件</span></span><br><span class="line">            String fullName = PREFIX + service.getName();</span><br><span class="line">            <span class="comment">//将文件路径转成URL对象</span></span><br><span class="line">            configs = loader.getResources(fullName);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> ((pending == <span class="keyword">null</span>) || !pending.hasNext()) &#123;</span><br><span class="line">			<span class="comment">//解析URL文件对象，读取内容，最后返回</span></span><br><span class="line">       		pending = parse(service, configs.nextElement());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//拿到第一个实现类的类名</span></span><br><span class="line">        nextName = pending.next();</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    创建实例对象，当然，调用next方法时，实际调用到的是lookupIterator.nextService。它通过反射的方式，创建实现类的实例并返回。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">LazyIterator</span> <span class="keyword">implements</span> <span class="title">Iterator</span>&lt;<span class="title">S</span>&gt; </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">private</span> S <span class="title">nextService</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="comment">//全限定类名</span></span><br><span class="line">        String cn = nextName;</span><br><span class="line">        nextName = <span class="keyword">null</span>;</span><br><span class="line">        <span class="comment">//创建类的Class对象</span></span><br><span class="line">        Class&lt;?&gt; c = Class.forName(cn, <span class="keyword">false</span>, loader);</span><br><span class="line">        <span class="comment">//通过newInstance实例化</span></span><br><span class="line">        S p = service.cast(c.newInstance());</span><br><span class="line">        <span class="comment">//放入集合，返回实例</span></span><br><span class="line">        providers.put(cn, p);</span><br><span class="line">        <span class="keyword">return</span> p;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​    看到这儿应该很清楚了，获取到类的实例，然后就可以做事情了。</p>
+]]></content>
+      <categories>
+        <category>SpringBoot</category>
+      </categories>
+      <tags>
+        <tag>SpringBoot</tag>
       </tags>
   </entry>
   <entry>
@@ -521,6 +618,23 @@ $ hexo clean
       </categories>
   </entry>
   <entry>
+    <title>微服务配置中心</title>
+    <url>/202108241927.html</url>
+    <content><![CDATA[<p>进行技术选型，首先应该是站在一个细化的角度，从各个方面去对比技术。</p>
+<p>哪个技术最热门，用的人最多，那么就选用哪个技术。如果都很热门，用的人都很多，怎么选？<br>分场景，每种技术适合什么场景；<br>分公司，每种技术适合小公司还是大公司；</p>
+<p>选型：Apollo、SpringCloudConfig、Nacos</p>
+<p>apollo: 架构比较复杂，比较完善的，功能上也很完善，中小型公司并不一定要使用，中大型公司可以考虑使用。<br><a href="https://github.com/ctripcorp/apollo">https://github.com/ctripcorp/apollo</a></p>
+<p>nacos: 作为一个服务注册中心本身就包含了配置中心的功能，没必要花很多时间再去部署一套apollo，完全可以满足很多中小型公司的配置中心的需求，哪怕是大公司也是可以用的，apollo确实用的公司很多，中大型公司都会去用apollo，而且他的功能也很完善。</p>
+<p>spring cloud config: 如果用的不是spring cloud alibaba，用的是apring cloud netflix，可以配合那个技术栈，直接使用spring cloud提供的config项目作为配置中心就可以了，因为这是属于spring cloud原生技术栈里提供的。</p>
+]]></content>
+      <categories>
+        <category>微服务</category>
+      </categories>
+      <tags>
+        <tag>微服务</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>数据库事务</title>
     <url>/202011182114.html</url>
     <content><![CDATA[<h3 id="一、数据库事务的4个特性（ACID）"><a href="#一、数据库事务的4个特性（ACID）" class="headerlink" title="一、数据库事务的4个特性（ACID）"></a>一、数据库事务的4个特性（ACID）</h3><ul>
@@ -632,120 +746,6 @@ $ hexo clean
       </categories>
       <tags>
         <tag>生活</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Centos7 没有ifconfig命令解决办法</title>
-    <url>/202108222111.html</url>
-    <content><![CDATA[<p>ifconfig命令用来查看ip信息，Linux最小化安装是没有ifconfig的，以下演示如果安装ifconfig。</p>
-<h5 id="1-输入ifconfig提示不存在"><a href="#1-输入ifconfig提示不存在" class="headerlink" title="1.输入ifconfig提示不存在"></a><strong>1.输入ifconfig提示不存在</strong></h5><p><img src="/202108222111/2021082201.png" alt="-bash: ifconfig: command not found">  </p>
-<h5 id="2-先确认是否因为环境变量没有ifconfig导致的"><a href="#2-先确认是否因为环境变量没有ifconfig导致的" class="headerlink" title="2.先确认是否因为环境变量没有ifconfig导致的"></a>2.先确认是否因为环境变量没有ifconfig导致的</h5><p><img src="/202108222111/2021082202.png" alt="环境变量"><br>  表示系统没有安装ifconfig</p>
-<h5 id="3-安装ifconfig"><a href="#3-安装ifconfig" class="headerlink" title="3.安装ifconfig"></a><strong>3.安装ifconfig</strong></h5><pre><code># yum install ifconfig  </code></pre>
-<p><img src="/202108222111/2021082203.png" alt="安装ifconfig"> </p>
-<h5 id="4-提示没有ifconfig安装包。再使用yum-search-ifconfig来搜索下ifconfig的相关"><a href="#4-提示没有ifconfig安装包。再使用yum-search-ifconfig来搜索下ifconfig的相关" class="headerlink" title="4.提示没有ifconfig安装包。再使用yum search ifconfig来搜索下ifconfig的相关"></a><strong>4.提示没有ifconfig安装包。再使用yum search ifconfig来搜索下ifconfig的相关</strong></h5><pre><code># yum search ifconfig  </code></pre>
-<p><img src="/202108222111/2021082204.png" alt="查看ifconfig相关"> </p>
-<h5 id="5-查看ifconfig匹配的是net-tools-x86-64包，安装net-tools-x86-64包"><a href="#5-查看ifconfig匹配的是net-tools-x86-64包，安装net-tools-x86-64包" class="headerlink" title="5.查看ifconfig匹配的是net-tools.x86_64包，安装net-tools.x86_64包"></a><strong>5.查看ifconfig匹配的是net-tools.x86_64包，安装net-tools.x86_64包</strong></h5><pre><code># yum install net-tools.x86_64 -y  </code></pre>
-<p><img src="/202108222111/2021082205.png" alt="安装net-tools.x86_64"> </p>
-<h5 id="6-输入ifconfig查看效果"><a href="#6-输入ifconfig查看效果" class="headerlink" title="6.输入ifconfig查看效果"></a><strong>6.输入ifconfig查看效果</strong></h5><pre><code># ifconfig</code></pre>
-<p><img src="/202108222111/2021082206.png" alt="查看ip"> </p>
-<h5 id="7-输入ip-addr也可以查询"><a href="#7-输入ip-addr也可以查询" class="headerlink" title="7.输入ip addr也可以查询"></a><strong>7.输入ip addr也可以查询</strong></h5><pre><code># ip addr</code></pre>
-<p><img src="/202108222111/2021082207.png" alt="查看ip"> </p>
-]]></content>
-  </entry>
-  <entry>
-    <title>Centos7 防火墙配置</title>
-    <url>/202108232023.html</url>
-    <content><![CDATA[<h5 id="1-查看防火墙服务状态"><a href="#1-查看防火墙服务状态" class="headerlink" title="1.查看防火墙服务状态"></a>1.查看防火墙服务状态</h5><pre><code># systemctl status firewalld</code></pre>
-<h5 id="2-查看防火墙状态"><a href="#2-查看防火墙状态" class="headerlink" title="2.查看防火墙状态"></a>2.查看防火墙状态</h5><pre><code># firewall-cmd --state</code></pre>
-<h5 id="3-开启、重启、关闭防火墙服务"><a href="#3-开启、重启、关闭防火墙服务" class="headerlink" title="3.开启、重启、关闭防火墙服务"></a>3.开启、重启、关闭防火墙服务</h5><pre><code># 开启
-# service firewalld start 或 # systemctl start firewalld.service
-# 重启
-# service firewalld restart
-# 关闭
-# service firewalld stop 或 # systemctl stop firewalld.service
-# 关闭防火墙开机启动
-# systemctl disable firewalld.service
-# 开启防火墙开机启动
-# systemctl enable firewalld.service</code></pre>
-<h5 id="4-查看防火墙规则"><a href="#4-查看防火墙规则" class="headerlink" title="4.查看防火墙规则"></a>4.查看防火墙规则</h5><pre><code># firewall-cmd --list-all</code></pre>
-<h5 id="5-查询、开放、关闭端口"><a href="#5-查询、开放、关闭端口" class="headerlink" title="5.查询、开放、关闭端口"></a>5.查询、开放、关闭端口</h5><pre><code># 查询端口是否开放
-# firewall-cmd --query-port=8080/tcp
-# 开放80端口
-# firewall-cmd --permanent --add-port=80/tcp
-# 移除端口
-# firewall-cmd --permanent --remove-port=8080/tcp
-
-#重启防火墙（修改配置后要重启防火墙）
-# firewall-cmd --reload</code></pre>
-]]></content>
-      <categories>
-        <category>Linux</category>
-      </categories>
-      <tags>
-        <tag>Linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SPI</title>
-    <url>/202302041119.html</url>
-    <content><![CDATA[<h1 id="1、什么是SPI？"><a href="#1、什么是SPI？" class="headerlink" title="1、什么是SPI？"></a>1、什么是SPI？</h1><p>​    <strong>SPI</strong>全称为Service Provider Interface，是一种服务发现机制。它通过在ClassPath路径下的META-INF/services文件夹查找文件，自动加载文件里所定义的类。这一机制为很多框架扩展提供了可能，比如现在的Dubbo、JDBC中都使用到了SPI机制。为什么要学SPI，因为在SpringBoot的自动装配中其实有使用到SPI机制，所以掌握了这部分对于SpringBoot的学习还是很有帮助的。</p>
-<p>​    总结：SPI就是我定义接口，你去实现这些接口，然后在某个文件里告诉我实现是什么即可。</p>
-<h1 id="2、案例"><a href="#2、案例" class="headerlink" title="2、案例"></a>2、案例</h1><p>​    我们Java在进行数据库连接时使用的JDBC，数据库的种类比较多，我们常用的就是MySQL和Oracle，如果没有一个访问数据库的统一接口，那么连接不同的数据库就需要写不同的程序，这样对程序员来说比较繁琐，而JDBC就提供了一些接口，定义了操作数据库的抽象行为，由各个数据库厂商自己实现。</p>
-<h2 id="2-1-程序是怎么知道这些接口是由哪些Java类实现的呢？"><a href="#2-1-程序是怎么知道这些接口是由哪些Java类实现的呢？" class="headerlink" title="2.1 程序是怎么知道这些接口是由哪些Java类实现的呢？"></a>2.1 程序是怎么知道这些接口是由哪些Java类实现的呢？</h2><p>​    基于这个点，SPI定义了一个规范，实现者要在META-INF/services下创建接口名的文件，然后在文件中是接口的具体实现类。</p>
-<h2 id="2-2-案例介绍"><a href="#2-2-案例介绍" class="headerlink" title="2.2 案例介绍"></a>2.2 案例介绍</h2><p>​    先定义接口项目</p>
-<p><img src="/202302041119/SPI-01.png"></p>
-<p>​    然后创建一个扩展的实现，先导入上面接口项目的依赖</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.liyyao<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>MyDataBase<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>​    然后创建接口的实现</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * SPI：MySQL对于getUrl的一种实现</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MySqlConnection</span> <span class="keyword">implements</span> <span class="title">Connection</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getUrl</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;mysql...&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>​    然后在resources目录下创建META-INF/services目录，然后在目录中创建一个文件，名称必须是定义的接口的全类路径名称。然后在文件中写上接口的实现类的全类路径名称。</p>
-<p><img src="/202302041119/%5Cblog%5Cblog%5Csource_posts%5CSPI%5CSPI-02.png"></p>
-<p>同样的再创建一个扩展的实现</p>
-<p><img src="/202302041119/.%5CSPI%5CSPI-03.png"></p>
-<p>然后创建一个测试的项目，导入扩展的项目，然后进行测试，测试代码如下</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    ServiceLoader&lt;Connection&gt; load = ServiceLoader.load(Connection.class);</span><br><span class="line">    Iterator&lt;Connection&gt; iterator = load.iterator();</span><br><span class="line">    <span class="keyword">while</span> (iterator.hasNext()) &#123;</span><br><span class="line">        Connection con = iterator.next();</span><br><span class="line">        con.getUrl();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>根据不同的导入，执行的逻辑会有不同</p>
-<p><img src="/202302041119/.%5CSPI%5CSPI-04.png"></p>
-<p><img src="/202302041119/.%5CSPI%5CSPI-05.png"></p>
-<h1 id="3、源码查看"><a href="#3、源码查看" class="headerlink" title="3、源码查看"></a>3、源码查看</h1><h2 id="3-1、ServiceLoader"><a href="#3-1、ServiceLoader" class="headerlink" title="3.1、ServiceLoader"></a>3.1、ServiceLoader</h2><p>​    首先来看下ServiceLoader的类结构</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 配置文件的路径</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String PREFIX = <span class="string">&quot;META-INF/services/&quot;</span>;</span><br><span class="line"><span class="comment">// 加载的服务 类或者接口</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Class&lt;S&gt; service;</span><br><span class="line"><span class="comment">// 类加载器</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ClassLoader loader;</span><br><span class="line"><span class="comment">// 访问权限的上下文对象</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> AccessControlContext acc;</span><br><span class="line"><span class="comment">// 保存已经加载的服务类</span></span><br><span class="line"><span class="keyword">private</span> LinkedHashMap&lt;String,S&gt; providers = <span class="keyword">new</span> LinkedHashMap&lt;&gt;();</span><br><span class="line"><span class="comment">// 内部类，真正加载服务类</span></span><br><span class="line"><span class="keyword">private</span> LazyIterator lookupIterator;</span><br></pre></td></tr></table></figure>
-
-<h2 id="3-2、load"><a href="#3-2、load" class="headerlink" title="3.2、load"></a>3.2、load</h2><p>​    load方法创建了一些属性，重要的是实例化了内部类，LazyIterator。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">ServiceLoader</span>&lt;<span class="title">S</span>&gt; <span class="keyword">implements</span> <span class="title">Iterable</span>&lt;<span class="title">S</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">ServiceLoader</span><span class="params">(Class&lt;S&gt; svc, ClassLoader cl)</span> </span>&#123;</span><br><span class="line">    	<span class="comment">//要加载的接口</span></span><br><span class="line">        service = Objects.requireNonNull(svc, <span class="string">&quot;Service interface cannot be null&quot;</span>);</span><br><span class="line">        <span class="comment">//类加载器</span></span><br><span class="line">        loader = (cl == <span class="keyword">null</span>) ? ClassLoader.getSystemClassLoader() : cl;</span><br><span class="line">        <span class="comment">//访问控制器</span></span><br><span class="line">        acc = (System.getSecurityManager() != <span class="keyword">null</span>) ? AccessController.getContext():<span class="keyword">null</span>;</span><br><span class="line">        reload();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">reload</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    	<span class="comment">//先清空</span></span><br><span class="line">        providers.clear();</span><br><span class="line">        <span class="comment">//实例化内部类</span></span><br><span class="line">        lookupIterator = <span class="keyword">new</span> LazyIterator(service, loader);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>​    查找实现类和创建实现类的过程，都在LazyIterator完成。当我们调用iterator.hasNext和iterator.next方法时，实际上调用的都是LazyIterator的相应方法。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">LazyIterator</span> <span class="keyword">implements</span> <span class="title">Iterator</span>&lt;<span class="title">S</span>&gt; </span>&#123;</span><br><span class="line">    Class&lt;S&gt; service;</span><br><span class="line">    ClassLoader loader;</span><br><span class="line">    Enumeration&lt;URL&gt; configs = <span class="keyword">null</span>;</span><br><span class="line">    Iterator&lt;String&gt; pending = <span class="keyword">null</span>;</span><br><span class="line">    String nextName = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">hasNextService</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (nextName != <span class="keyword">null</span>) &#123;</span><br><span class="line">        	<span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (configs == <span class="keyword">null</span>) &#123;</span><br><span class="line">        	<span class="comment">//META-INF/services/ 加上接口的全限定类名，就是文件服务类的文件</span></span><br><span class="line">            String fullName = PREFIX + service.getName();</span><br><span class="line">            <span class="comment">//将文件路径转成URL对象</span></span><br><span class="line">            configs = loader.getResources(fullName);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> ((pending == <span class="keyword">null</span>) || !pending.hasNext()) &#123;</span><br><span class="line">			<span class="comment">//解析URL文件对象，读取内容，最后返回</span></span><br><span class="line">       		pending = parse(service, configs.nextElement());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//拿到第一个实现类的类名</span></span><br><span class="line">        nextName = pending.next();</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>​    创建实例对象，当然，调用next方法时，实际调用到的是lookupIterator.nextService。它通过反射的方式，创建实现类的实例并返回。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">LazyIterator</span> <span class="keyword">implements</span> <span class="title">Iterator</span>&lt;<span class="title">S</span>&gt; </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">private</span> S <span class="title">nextService</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="comment">//全限定类名</span></span><br><span class="line">        String cn = nextName;</span><br><span class="line">        nextName = <span class="keyword">null</span>;</span><br><span class="line">        <span class="comment">//创建类的Class对象</span></span><br><span class="line">        Class&lt;?&gt; c = Class.forName(cn, <span class="keyword">false</span>, loader);</span><br><span class="line">        <span class="comment">//通过newInstance实例化</span></span><br><span class="line">        S p = service.cast(c.newInstance());</span><br><span class="line">        <span class="comment">//放入集合，返回实例</span></span><br><span class="line">        providers.put(cn, p);</span><br><span class="line">        <span class="keyword">return</span> p;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>​    看到这儿应该很清楚了，获取到类的实例，然后就可以做事情了。</p>
-]]></content>
-      <categories>
-        <category>SpringBoot</category>
-      </categories>
-      <tags>
-        <tag>SpringBoot</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>微服务配置中心</title>
-    <url>/202108241927.html</url>
-    <content><![CDATA[<p>进行技术选型，首先应该是站在一个细化的角度，从各个方面去对比技术。</p>
-<p>哪个技术最热门，用的人最多，那么就选用哪个技术。如果都很热门，用的人都很多，怎么选？<br>分场景，每种技术适合什么场景；<br>分公司，每种技术适合小公司还是大公司；</p>
-<p>选型：Apollo、SpringCloudConfig、Nacos</p>
-<p>apollo: 架构比较复杂，比较完善的，功能上也很完善，中小型公司并不一定要使用，中大型公司可以考虑使用。<br><a href="https://github.com/ctripcorp/apollo">https://github.com/ctripcorp/apollo</a></p>
-<p>nacos: 作为一个服务注册中心本身就包含了配置中心的功能，没必要花很多时间再去部署一套apollo，完全可以满足很多中小型公司的配置中心的需求，哪怕是大公司也是可以用的，apollo确实用的公司很多，中大型公司都会去用apollo，而且他的功能也很完善。</p>
-<p>spring cloud config: 如果用的不是spring cloud alibaba，用的是apring cloud netflix，可以配合那个技术栈，直接使用spring cloud提供的config项目作为配置中心就可以了，因为这是属于spring cloud原生技术栈里提供的。</p>
-]]></content>
-      <categories>
-        <category>微服务</category>
-      </categories>
-      <tags>
-        <tag>微服务</tag>
       </tags>
   </entry>
   <entry>

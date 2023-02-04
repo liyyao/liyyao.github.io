@@ -1012,4 +1012,33 @@ Message Dequeued: 已出队列的消息，即已被消费掉的消息数目。�
         <tag>mq</tag>
       </tags>
   </entry>
+  <entry>
+    <title>hexo问题总结</title>
+    <url>/202302041746.html</url>
+    <content><![CDATA[<h2 id="1、执行hexo-deploy时，出现权限问题"><a href="#1、执行hexo-deploy时，出现权限问题" class="headerlink" title="1、执行hexo deploy时，出现权限问题"></a>1、执行hexo deploy时，出现权限问题</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Permission denied (publickey). </span><br><span class="line">fatal: Could not read from remote repository.</span><br><span class="line">Please make sure you have the correct access rights and the repository exists.</span><br></pre></td></tr></table></figure>
+
+<p>大致意思是说：没有权限，无法读取远程仓库。请确保你有正确的访问权限或者确认仓库的存在。</p>
+<p><strong>解决方案</strong></p>
+<p>简单粗暴的方法：直接删除已有的SSH文件然后重新设置并添加到github上。</p>
+<p><strong>具体操作</strong></p>
+<p>打开终端，输入：<font color="red"><code>ssh-keygen -t rsa -C &quot;你的邮箱地址&quot;</code></font> 这个命令会生成一个以你的邮箱为标签的SSH Key。</p>
+<p>然后bash会显示：</p>
+<p><font color="red"><code>Generating public/private rsa key pair.</code></font><br><font color="red"><code>Enter file in which to save the key (/c/Users/xxx/.ssh/id_rsa):</code></font> </p>
+<p>直接回车，然后出现：</p>
+<p><font color="red"><code>/c/Users/xxx/.ssh/id_rsa already exists.</code></font><br><font color="red"><code>Overwrite (y/n)?</code></font> </p>
+<p>这说明你之前已经生成有SSH Key，此时你可以根据情况选择是否覆盖。</p>
+<p>接下来将SSH Key添加到GitHub</p>
+<ul>
+<li><p>打开自己的GitHub，点击自己的头像找到Settings，然后在侧栏找到SSH and GPG keys，点击new SSH，复制刚才生成的id_rsa.pub中的所有内容到Key框中，在Title框中输入方便查找的名字保存即可。</p>
+</li>
+<li><p>打开终端，输入：<code>ssh -T git@github.com</code> 会在bash中显示：</p>
+<p><code>Hi liyyao! You&#39;ve successfully authenticated, but GitHub does not provide shell access.</code><br><code>Connection to github.com closed.</code></p>
+<p>看到此提示表示已经配置好了，再执行hexo deploy就不会有问题了。</p>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>hexo</category>
+      </categories>
+  </entry>
 </search>

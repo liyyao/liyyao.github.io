@@ -32,7 +32,7 @@
 <meta property="og:image" content="http://www.liyyao.com/202302061853/spring-00.png">
 <meta property="og:image" content="http://www.liyyao.com/202302061853/spring-01.png">
 <meta property="og:image" content="http://www.liyyao.com/202302061853/spring-02.png">
-<meta property="og:image" content="http://www.liyyao.com/202302061853/blog/blog/source_posts/Spring注解编程发展过程/spring-03.png">
+<meta property="og:image" content="http://www.liyyao.com/202302061853/spring-03.png">
 <meta property="og:image" content="http://www.liyyao.com/202302061853/spring-04.png">
 <meta property="og:image" content="http://www.liyyao.com/202302061853/spring-05.png">
 <meta property="og:image" content="http://www.liyyao.com/202302061853/spring-06.png">
@@ -45,7 +45,7 @@
 <meta property="og:image" content="http://www.liyyao.com/202302061853/spring-13.png">
 <meta property="og:image" content="http://www.liyyao.com/202302061853/spring-14.png">
 <meta property="article:published_time" content="2023-02-06T10:53:52.000Z">
-<meta property="article:modified_time" content="2023-02-07T00:11:03.512Z">
+<meta property="article:modified_time" content="2023-02-07T08:59:17.278Z">
 <meta property="article:author" content="liyyao">
 <meta property="article:tag" content="spring">
 <meta name="twitter:card" content="summary">
@@ -238,7 +238,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-02-07 08:11:03" itemprop="dateModified" datetime="2023-02-07T08:11:03+08:00">2023-02-07</time>
+                <time title="修改时间：2023-02-07 16:59:17" itemprop="dateModified" datetime="2023-02-07T16:59:17+08:00">2023-02-07</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -269,7 +269,7 @@
 
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    ApplicationContext ac = <span class="keyword">new</span> FileSystemXmlApplicationContext(<span class="string">&quot;classpath:applicationContext01.xml&quot;</span>);</span><br><span class="line">    System.out.println(<span class="string">&quot;ac.getBean(UserService.class) = &quot;</span> + ac.getBean(UserService.class));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>在Spring1.2版本的时候，提供了<font color="red">**<code>@Transaction</code>**</font>（org.springframework.transaction.annotation）注解。简化了事件的操作。</p>
+<p>在Spring1.2版本的时候，提供了**<font color="red"><code>@Transaction</code></font>**（org.springframework.transaction.annotation）注解。简化了事件的操作。</p>
 <h3 id="1-2-Spring-2-x"><a href="#1-2-Spring-2-x" class="headerlink" title="1.2 Spring 2.x"></a>1.2 Spring 2.x</h3><p>在2006年10月3日Spring2.0版本问世，在2.x版本中，比较重要的特点是增加了很多注解。</p>
 <h4 id="1-2-1-Spring2-5之前"><a href="#1-2-1-Spring2-5之前" class="headerlink" title="1.2.1 Spring2.5之前"></a>1.2.1 Spring2.5之前</h4><p>在<strong>Spring 2.5之前</strong>新增的有<code>@Required</code> <code>@Repository</code> <code>@Aspect</code>，同时也扩展了XML的配置能力，提供了第三方的扩展标签，比如<code>&lt;dubbo&gt;</code>。</p>
 <h5 id="1-2-1-Required"><a href="#1-2-1-Required" class="headerlink" title="1.2.1 @Required"></a>1.2.1 @Required</h5><p>如果你在某个java类的某个set方法上使用了该注解，那么该set方法对应的属性在xml配置文件中必须被设置，否则应付报错。</p>
@@ -279,7 +279,7 @@
 <p>设置好属性后就没有错误提示了</p>
 <p><img src="/202302061853/spring-02.png"></p>
 <p>源码中可以看到@Required从2.0开始提供</p>
-<p><img src="/202302061853/blog\blog\source_posts\Spring注解编程发展过程\spring-03.png"></p>
+<p><img src="/202302061853/spring-03.png"></p>
 <h5 id="1-2-2-Repository"><a href="#1-2-2-Repository" class="headerlink" title="1.2.2 @Repository"></a>1.2.2 @Repository</h5><p>@Repository对应数据访问层Bean，这个注解在Spring2.0版本就提供了</p>
 <p><img src="/202302061853/spring-04.png"></p>
 <h5 id="1-2-3-Aspect"><a href="#1-2-3-Aspect" class="headerlink" title="1.2.3 @Aspect"></a>1.2.3 @Aspect</h5><p>@Aspect是AOP相关的一个注解，用来标识配置类。</p>
@@ -451,7 +451,7 @@
   <p><span>本文标题:</span><a href="/202302061853.html">00-Spring注解编程发展过程</a></p>
   <p><span>文章作者:</span><a href="/" title="访问  的个人博客"></a></p>
   <p><span>发布时间:</span>2023年02月06日 - 18:02</p>
-  <p><span>最后更新:</span>2023年02月07日 - 08:02</p>
+  <p><span>最后更新:</span>2023年02月07日 - 16:02</p>
   <p><span>原始链接:</span><a href="/202302061853.html" title="00-Spring注解编程发展过程">http://www.liyyao.com/202302061853.html</a>
     <span class="copy-path"  title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="http://www.liyyao.com/202302061853.html"  aria-label="复制成功！"></i></span>
   </p>

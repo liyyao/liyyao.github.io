@@ -1042,7 +1042,7 @@ Message Dequeued: 已出队列的消息，即已被消费掉的消息数目。�
       </categories>
   </entry>
   <entry>
-    <title>SpringBoot学习</title>
+    <title>00-SpringBoot自动装配</title>
     <url>/202302061623.html</url>
     <content><![CDATA[<h2 id="1、SpringBoot自动装配"><a href="#1、SpringBoot自动装配" class="headerlink" title="1、SpringBoot自动装配"></a>1、SpringBoot自动装配</h2><p>Spring Framework一直在致力于解决一个问题，就是如何让Bean的管理变得更简单，如何让开发者尽可能的少关注一些基础化的bean的配置，从而实现自动装配。所以，所谓的自动装配，实际上就是如何自动将Bean装载到IoC容器中来。</p>
 <p>实际上在Spring 3.x版本中，Enable模块驱动注解的出现，已经有了一定的自动装配的雏形，而真正能够实现这一机制，还是在Spring 4.x版本中，Conditional条件注解的出现，接下来我们来看一下SpringBoot的自动装配是怎么一回事。</p>
